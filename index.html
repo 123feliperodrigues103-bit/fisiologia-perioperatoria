@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Calculadora educacional de gasometria arterial e venosa central pareadas." />
+  <title>Fisiologia Perioperatória · Gasometria Pareada</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar"><div class="brand"><span class="mark">φ</span><div><strong>Fisiologia Perioperatória</strong><small>Aprender · Calcular · Interpretar</small></div></div><span class="pill">Protótipo educacional v0.1</span></header>
+  <main>
+    <section class="intro"><div><span class="eyebrow">MÓDULO 001</span><h1>Gasometria pareada</h1><p>Entre com os valores da gasometria arterial e venosa central. Compare dois momentos e abra a fundamentação de cada cálculo.</p></div><button id="reset" class="secondary">Restaurar Caso 001</button></section>
+    <div class="notice">Ferramenta para estudo, não validada para decisões assistenciais. Saturação venosa obtida do cateter central não equivale automaticamente à saturação venosa mista.</div>
+    <section class="moments" aria-label="Momentos de coleta"><button class="tab active" data-moment="t0">T0 · 09:03</button><button class="tab" data-moment="tf">Tfinal · 13:32–35</button></section>
+    <section class="inputs">
+      <div class="panel"><h2>Dados comuns</h2><div class="fields" id="commonFields"></div><p class="hint">A hemoglobina venosa não foi medida; quando ausente, usamos Hb arterial como hipótese explícita.</p></div>
+      <div class="panel"><h2>Gasometria arterial</h2><div class="fields" id="arterialFields"></div></div>
+      <div class="panel"><h2>Gasometria venosa central</h2><div class="fields" id="venousFields"></div><p class="hint">Caso 001: CVC com ponta em átrio direito. A amostra não é venosa mista verdadeira.</p></div>
+    </section>
+    <section class="results"><div class="section-heading"><div><span class="eyebrow">RESULTADOS</span><h2>Cálculos em tempo real</h2></div><span id="validation" aria-live="polite"></span></div><div id="metricCards" class="metric-grid"></div></section>
+    <section class="comparison panel"><div class="section-heading"><div><span class="eyebrow">EVOLUÇÃO</span><h2>Comparação temporal</h2></div></div><div class="table-wrap"><table><thead><tr><th>Variável</th><th>T0</th><th>Tfinal</th><th>Variação</th></tr></thead><tbody id="compareBody"></tbody></table></div></section>
+    <section class="notes panel"><h2>Como interpretar estes números?</h2><p>Resultados calculados não são medidas de débito cardíaco nem de perfusão tecidual. Sem débito cardíaco e amostra venosa mista, não apresentamos DO₂, VO₂ nem extração sistêmica real.</p><p><strong>Fontes e auditoria:</strong> esta versão implementa as fórmulas propostas na base científica do projeto, ainda sujeitas à revisão independente e validação bibliográfica.</p></section>
+  </main>
+  <dialog id="infoDialog"><div class="dialog-body"><button id="closeDialog" class="close" aria-label="Fechar">×</button><span class="eyebrow">FICHA DA VARIÁVEL</span><h2 id="dialogTitle"></h2><div id="dialogContent"></div></div></dialog>
+  <footer>Projeto acadêmico independente · Caso 001 · Sem dados identificáveis de pacientes</footer>
+  <script src="script.js" defer></script>
+</body>
+</html>
