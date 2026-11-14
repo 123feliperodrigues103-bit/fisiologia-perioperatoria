@@ -86,7 +86,7 @@ function pfPanel(tab){
    <li><strong>Interpretação etiológica:</strong> P/F não diferencia shunt verdadeiro de baixo V/Q e não mede diretamente a fração de shunt.</li>
    <li><strong>Contexto:</strong> uma P/F acima de 300 não prova trocas gasosas normais; abaixo de 300, isoladamente, não diagnostica SDRA.</li>
   </ul>
-  <div class="concept-note">Comparações seriadas são mais úteis quando acompanhadas da FiO₂, ventilação e demais condições de coleta. No Caso 001, a FiO₂ permaneceu em 50%.</div>`;
+  <div class="concept-note">Comparações seriadas devem considerar FiO₂, ventilação e demais condições de coleta, independentemente do caso analisado.</div>`;
  return `
   <h3>Fontes principais — bibliografia do TSA</h3>
   <ol class="science-list">
@@ -106,19 +106,76 @@ function renderPfTab(tab){
  });
  document.getElementById('pfTabContent').innerHTML=pfPanel(tab);
 }
+// Ficha 002: síntese educacional de Miller (caps. 12, 13 e 32) e
+// Barash (9ª ed., caps. 12, 15 e 26). Não substitui avaliação clínica.
+function dco2Panel(tab){
+ const d=data[selected];
+ const valid=Number.isFinite(d.vpco2)&&d.vpco2>=0&&Number.isFinite(d.apco2)&&d.apco2>=0;
+ const gap=valid?d.vpco2-d.apco2:null;
+ if(tab==='entender')return `
+  <h3>O que significa o gradiente venoso central–arterial de CO₂?</h3>
+  <p>É a diferença entre a <strong>pressão parcial de CO₂ da amostra venosa central (PcvCO₂)</strong> e a <strong>PaCO₂ da amostra arterial</strong>, coletadas em momentos comparáveis.</p>
+  <p>Os tecidos produzem CO₂, que é transportado pelo sangue até os pulmões. Em condições relativamente estáveis, <strong>fluxo sanguíneo menor para uma mesma produção de CO₂</strong> tende a aumentar a diferença de conteúdo venoarterial de CO₂ e pode aumentar o gradiente de pressões.</p>
+  <div class="concept-note"><strong>Ideia central:</strong> o gradiente de PCO₂ pode trazer informação indireta sobre a relação entre fluxo e produção de CO₂, mas não é uma medida de débito cardíaco, perfusão microcirculatória ou metabolismo anaeróbico.</div>
+  <p>O CO₂ circula como bicarbonato, compostos carbamino e CO₂ dissolvido. A <strong>PCO₂ não é o conteúdo total de CO₂</strong> no sangue.</p>`;
+ if(tab==='formula')return `
+  <h3>Como calcular</h3>
+  <div class="equation equation-large">ΔPcv–aCO₂ = PcvCO₂ − PaCO₂</div>
+  <p>As duas grandezas são pressões parciais em mmHg, portanto o gradiente também é expresso em <strong>mmHg</strong>. Uma amostra venosa central não é automaticamente equivalente à venosa mista.</p>
+  <div class="worked-example"><span class="eyebrow">CÁLCULO DINÂMICO · ${selected==='t0'?'T0':'TFINAL'}</span>
+   <p>PcvCO₂ = <strong>${Number.isFinite(d.vpco2)?format(d.vpco2,1):'—'} mmHg</strong></p>
+   <p>PaCO₂ = <strong>${Number.isFinite(d.apco2)?format(d.apco2,1):'—'} mmHg</strong></p>
+   <div class="worked-result">${valid?`${format(d.vpco2,1)} − ${format(d.apco2,1)} = <strong>${format(gap,1)} mmHg</strong>`:'Preencha pressões parciais válidas.'}</div>
+  </div>
+  <h3>Por que o fluxo pode influenciar esse gradiente?</h3>
+  <div class="equation">V̇CO₂ = DC × (Cv̄CO₂ − CaCO₂)</div>
+  <p>Esse é o princípio de Fick para o CO₂ em estado estacionário: <strong>DC</strong> é débito cardíaco e <strong>Cv̄CO₂ − CaCO₂</strong> é diferença de <strong>conteúdos</strong> venoso misto–arterial, não de pressões. Se DC estiver em L/min e os conteúdos em mL/dL, multiplique por 10 dL/L para obter V̇CO₂ em mL/min.</p>
+  <p>A passagem de diferença de conteúdo para diferença de pressões depende da curva de dissociação do CO₂; por isso, não se pode substituir diretamente uma pela outra.</p>`;
+ if(tab==='limites')return `
+  <h3>O que o ΔPCO₂ não permite concluir sozinho</h3>
+  <ul class="science-list">
+   <li><strong>Pressão ≠ conteúdo:</strong> a equação de Fick usa conteúdos; nossa calculadora utiliza pressões parciais.</li>
+   <li><strong>Efeito Haldane:</strong> a oxigenação da hemoglobina modifica a capacidade de transporte de CO₂. A desoxi-hemoglobina transporta mais CO₂ a uma mesma PCO₂, dificultando a conversão de pressão em conteúdo.</li>
+   <li><strong>Amostragem:</strong> sangue venoso central e venoso misto não são intercambiáveis. A posição do CVC e a composição do sangue coletado importam.</li>
+   <li><strong>Outros determinantes:</strong> metabolismo, hemoglobina, pH, temperatura, circulação regional e transientes ventilatórios podem influenciar o resultado.</li>
+   <li><strong>6 mmHg:</strong> limiar pragmático usado em estudos de terapia intensiva, não um divisor fisiológico absoluto. Acima dele não se prova baixo débito; abaixo dele não se garante perfusão adequada.</li>
+   <li><strong>Perfusão e oxigenação:</strong> um gradiente aparentemente normal não exclui alteração microcirculatória ou hipóxia tecidual.</li>
+   <li><strong>Comparação temporal:</strong> registrar contexto ventilatório, hemodinâmico e o intervalo entre coletas; uma mudança isolada não identifica sua causa.</li>
+  </ul>
+  <div class="concept-note">Evite usar o ΔPCO₂ como gatilho isolado para infusão de fluidos, inotrópicos ou outras intervenções.</div>`;
+ return `
+  <h3>Fontes principais — bibliografia do TSA</h3>
+  <ol class="science-list">
+   <li><em>Miller's Anesthesia</em>, capítulos 12 (<em>Respiratory Physiology and Pathophysiology</em>), 13 (<em>Cardiac Physiology</em>) e 32 (<em>Cardiovascular Monitoring</em>). Edição dos arquivos de origem a confirmar.</li>
+   <li><em>Barash — Clinical Anesthesia</em>, 9ª edição, capítulos 12 (<em>Cardiac Anatomy and Physiology</em>), 15 (<em>Respiratory Function in Anesthesia</em>) e 26 (<em>Commonly Used Monitoring Techniques</em>).</li>
+  </ol>
+  <p><strong>Contexto:</strong> a aplicação clínica do limiar de 6 mmHg deriva da literatura de terapia intensiva; não é uma equação fisiológica universal apresentada nesses capítulos.</p>
+  <p class="subtle">Síntese educacional original baseada nas fontes selecionadas para o projeto. Referências por capítulo, sem atribuição de páginas não verificadas.</p>`;
+}
+function renderScienceTab(tab){
+ const bar=document.getElementById('pfTabBar');
+ if(!bar)return;
+ bar.querySelectorAll('button').forEach(button=>{
+  const active=button.dataset.pfTab===tab;
+  button.classList.toggle('selected',active);
+  button.setAttribute('aria-selected',String(active));
+ });
+ const kind=bar.dataset.scienceKind;
+ document.getElementById('pfTabContent').innerHTML=kind==='dco2'?dco2Panel(tab):pfPanel(tab);
+}
 function info(key){
  const [title,description,equation,limit]=definitions[key];
  document.getElementById('dialogTitle').textContent=title;
  const node=document.getElementById('dialogContent');
  node.replaceChildren();
- if(key==='pf'){
-  const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.setAttribute('role','tablist');
+ if(key==='pf'||key==='dco2'){
+  const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.dataset.scienceKind=key;bar.setAttribute('role','tablist');
   for(const tab of pfTabs){
    const button=document.createElement('button');button.type='button';button.textContent=tab.label;
    button.dataset.pfTab=tab.id;button.setAttribute('role','tab');bar.appendChild(button);
   }
   const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';
-  node.append(bar,content);renderPfTab('entender');
+  node.append(bar,content);renderScienceTab('entender');
  }else{
   for(const sentence of [description,limit].filter(Boolean)){
    const p=document.createElement('p');p.textContent=sentence;node.appendChild(p);
@@ -128,6 +185,6 @@ function info(key){
  document.getElementById('infoDialog').showModal();
 }
 document.addEventListener('input',event=>{const input=event.target;if(!input.matches('[data-field]'))return;const raw=input.value.trim().replace(',','.');data[selected][input.dataset.field]=raw===''?null:Number(raw);render();});
-document.addEventListener('click',event=>{const tab=event.target.closest('[data-moment]');if(tab){selected=tab.dataset.moment;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===tab));renderFields();render();return;}const pfTab=event.target.closest('[data-pf-tab]');if(pfTab){renderPfTab(pfTab.dataset.pfTab);return;}const card=event.target.closest('[data-info]');if(card)info(card.dataset.info);});
+document.addEventListener('click',event=>{const tab=event.target.closest('[data-moment]');if(tab){selected=tab.dataset.moment;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===tab));renderFields();render();return;}const pfTab=event.target.closest('[data-pf-tab]');if(pfTab){renderScienceTab(pfTab.dataset.pfTab);return;}const card=event.target.closest('[data-info]');if(card)info(card.dataset.info);});
 document.getElementById('reset').onclick=()=>{data=structuredClone(original);renderFields();render();};document.getElementById('closeDialog').onclick=()=>document.getElementById('infoDialog').close();
 renderFields();render();

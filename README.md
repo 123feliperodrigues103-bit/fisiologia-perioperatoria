@@ -1,13 +1,16 @@
-# Fisiologia Perioperatória — v0.2
+# Fisiologia Perioperatória — v0.3
 
-Atualização da calculadora existente com ficha científica interativa da relação P/F.
+Calculadora educacional de gasometria arterial e venosa central pareadas, com fichas interativas da relação P/F e do gradiente central–arterial de PCO₂.
 
 ## Uso
-Abra `index.html` no navegador ou publique os três arquivos em sua hospedagem estática.
 
-- Clique no cartão **Relação P/F**.
-- Navegue por **Entender**, **Fórmula**, **Limitações** e **Referências**.
-- Na aba Fórmula, o exemplo usa o momento e os valores atualmente selecionados.
-- Para validar, alterne T0/Tfinal e confira P/F = 363,4/321,4 mmHg.
+Abra `index.html` no navegador ou publique `index.html`, `script.js` e `styles.css` na hospedagem estática.
 
-Não substitui decisões clínicas. O conteúdo educacional está sujeito a revisão editorial.
+- Edite livremente os valores de T0 e Tfinal; os cálculos e os exemplos das fichas são atualizados com os dados inseridos.
+- Clique em **Relação P/F** ou **ΔPCO₂**, e navegue por **Entender**, **Fórmula**, **Limitações** e **Referências**.
+- O Caso 001 é apenas o exemplo inicial; não é uma restrição de utilização da plataforma.
+- Para restaurar os dados de exemplo, use o botão **Restaurar Caso 001**.
+- Valores de teste de ΔPCO₂ com o exemplo: 6,4 mmHg (T0) e 1,6 mmHg (Tfinal).
+- Valores de teste P/F: 363,4 mmHg (T0) e 321,4 mmHg (Tfinal).
+
+Esta plataforma é educacional e não validada para decisões assistenciais.
