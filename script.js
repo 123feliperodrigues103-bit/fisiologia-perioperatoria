@@ -46,8 +46,88 @@ const decimals={pf:1,dco2:1,dph:2,cao2:2,cvo2:2,aav:2,eo2:2};
 const format=(value,digits=1)=>Number.isFinite(value)?value.toLocaleString('pt-BR',{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—';
 function renderFields(){for(const [id,arr] of Object.entries(fields))document.getElementById(id).innerHTML=arr.map(([key,label,unit])=>`<div class="field"><label for="f_${key}">${label} <span class="unit">${unit}</span></label><input id="f_${key}" type="number" step="any" inputmode="decimal" data-field="${key}" value="${data[selected][key]??''}" /></div>`).join('');}
 function render(){const result=calc(data[selected]);document.getElementById('validation').textContent=result?'':'Verifique os valores: campos numéricos válidos são necessários.';document.getElementById('metricCards').innerHTML=Object.keys(metricNames).map(key=>`<button class="metric" data-info="${key}"><span class="label">${metricNames[key]}</span><span class="number">${result?format(result[key],decimals[key]):'—'}</span><span class="unit">${units[key]}</span><span class="more">Entender fórmula e limites ↗</span></button>`).join('');const a=calc(data.t0),b=calc(data.tf);document.getElementById('compareBody').innerHTML=Object.keys(metricNames).map(key=>`<tr><td>${metricNames[key]} <span class="unit">${units[key]}</span></td><td>${a?format(a[key],decimals[key]):'—'}</td><td>${b?format(b[key],decimals[key]):'—'}</td><td>${a&&b?format(b[key]-a[key],decimals[key]):'—'}</td></tr>`).join('');}
-function info(key){const [title,description,equation,limit]=definitions[key];document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();for(const sentence of [description,limit].filter(Boolean)){const p=document.createElement('p');p.textContent=sentence;node.appendChild(p);}if(equation){const p=document.createElement('div');p.className='equation';p.textContent=equation;node.insertBefore(p,node.children[1]||null);}document.getElementById('infoDialog').showModal();}
+// Conteúdo educacional da primeira ficha: baseado em Miller (caps. 12 e 37)
+// e Barash, 9ª edição (caps. 15 e 26); síntese original do projeto.
+// Não usar este material como ferramenta clínica validada.
+const pfTabs = [
+ {id:'entender',label:'Entender'},
+ {id:'formula',label:'Fórmula'},
+ {id:'limites',label:'Limitações'},
+ {id:'fontes',label:'Referências'}
+];
+function pfPanel(tab){
+ const d=data[selected];
+ const pf=Number.isFinite(d.apo2)&&Number.isFinite(d.fio2)&&d.fio2>=21&&d.fio2<=100
+  ?d.apo2/(d.fio2/100):null;
+ if(tab==='entender')return `
+  <h3>O que a relação P/F descreve?</h3>
+  <p>É um índice da oxigenação arterial obtida para determinada fração inspirada de oxigênio (FiO₂). Relaciona a <strong>PaO₂ medida na gasometria</strong> com a <strong>FiO₂ administrada</strong>.</p>
+  <p>Uma P/F menor significa que, naquela condição de medida, a pressão arterial de O₂ foi menor em relação à fração inspirada. A relação, sozinha, não identifica a causa nem mede a porcentagem de shunt.</p>
+  <div class="concept-note"><strong>Ideia central:</strong> PaO₂ depende da pressão alveolar de O₂ e das trocas gasosas. Entre os determinantes estão a distribuição ventilação/perfusão (V/Q), o shunt e as condições de ventilação.</div>
+  <p>A relação P/F é utilizada na avaliação da oxigenação, inclusive como um componente dos critérios de SDRA. <strong>Um ponto de corte isolado não estabelece o diagnóstico.</strong></p>`;
+ if(tab==='formula')return `
+  <h3>Como calcular</h3>
+  <div class="equation equation-large">P/F = PaO₂ (mmHg) ÷ FiO₂ (fração)</div>
+  <p><strong>PaO₂:</strong> pressão parcial arterial de oxigênio, em mmHg. <strong>FiO₂:</strong> fração inspirada de oxigênio, sem unidade. Se digitada como percentual, divida por 100.</p>
+  <div class="worked-example"><span class="eyebrow">CÁLCULO DINÂMICO · ${selected==='t0'?'T0':'TFINAL'}</span>
+   <p>PaO₂ = <strong>${format(d.apo2,1)} mmHg</strong></p>
+   <p>FiO₂ = <strong>${format(d.fio2,1)}%</strong> = ${Number.isFinite(d.fio2)?format(d.fio2/100,2):'—'}</p>
+   <div class="worked-result">${pf===null?'Dados inválidos para P/F':`${format(d.apo2,1)} ÷ ${format(d.fio2/100,2)} = <strong>${format(pf,1)} mmHg</strong>`}</div>
+  </div>
+  <p><strong>Análise dimensional:</strong> pressão ÷ número adimensional = pressão. Por isso, a unidade física da P/F é mmHg, embora às vezes seja omitida na prática.</p>
+  <p class="subtle">Esta fórmula não calcula a pressão alveolar de O₂ nem a fração de shunt.</p>`;
+ if(tab==='limites')return `
+  <h3>O que a P/F não conta</h3>
+  <ul class="science-list">
+   <li><strong>FiO₂:</strong> a P/F não é necessariamente constante quando mudamos a FiO₂; o comportamento depende da distribuição V/Q e do shunt.</li>
+   <li><strong>PEEP e suporte ventilatório:</strong> a fórmula não incorpora PEEP ou pressão média das vias aéreas, embora possam alterar a oxigenação.</li>
+   <li><strong>Pressão barométrica e PaCO₂:</strong> modificam a pressão alveolar de O₂ e podem alterar a P/F mesmo sem nova lesão pulmonar.</li>
+   <li><strong>Circulação e extração:</strong> na presença de mistura venosa, o conteúdo venoso misto de O₂ pode influenciar a PaO₂. A hemoglobina não entra diretamente na equação P/F.</li>
+   <li><strong>Interpretação etiológica:</strong> P/F não diferencia shunt verdadeiro de baixo V/Q e não mede diretamente a fração de shunt.</li>
+   <li><strong>Contexto:</strong> uma P/F acima de 300 não prova trocas gasosas normais; abaixo de 300, isoladamente, não diagnostica SDRA.</li>
+  </ul>
+  <div class="concept-note">Comparações seriadas são mais úteis quando acompanhadas da FiO₂, ventilação e demais condições de coleta. No Caso 001, a FiO₂ permaneceu em 50%.</div>`;
+ return `
+  <h3>Fontes principais — bibliografia do TSA</h3>
+  <ol class="science-list">
+   <li><em>Miller's Anesthesia</em>, capítulos 12, <em>Respiratory Physiology and Pathophysiology</em>, e 37, <em>Respiratory Monitoring</em>. Edição dos arquivos de origem a confirmar.</li>
+   <li><em>Barash — Clinical Anesthesia</em>, 9ª edição, capítulos 15, <em>Respiratory Function in Anesthesia</em>, e 26, <em>Commonly Used Monitoring Techniques</em>.</li>
+  </ol>
+  <p><strong>Leituras complementares:</strong> Aboab e colaboradores (2006), <em>Relation between PaO₂/FiO₂ ratio and FiO₂: a mathematical description</em>; Karbing e colaboradores (2007), <em>Variation in the PaO₂/FiO₂ ratio with FiO₂</em>.</p>
+  <p class="subtle">Síntese educacional original baseada nas pesquisas do projeto. As referências são indicadas por capítulo, sem atribuir páginas não conferidas.</p>`;
+}
+function renderPfTab(tab){
+ const tabs=document.getElementById('pfTabBar');
+ if(!tabs)return;
+ tabs.querySelectorAll('button').forEach(button=>{
+  const active=button.dataset.pfTab===tab;
+  button.classList.toggle('selected',active);
+  button.setAttribute('aria-selected',String(active));
+ });
+ document.getElementById('pfTabContent').innerHTML=pfPanel(tab);
+}
+function info(key){
+ const [title,description,equation,limit]=definitions[key];
+ document.getElementById('dialogTitle').textContent=title;
+ const node=document.getElementById('dialogContent');
+ node.replaceChildren();
+ if(key==='pf'){
+  const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.setAttribute('role','tablist');
+  for(const tab of pfTabs){
+   const button=document.createElement('button');button.type='button';button.textContent=tab.label;
+   button.dataset.pfTab=tab.id;button.setAttribute('role','tab');bar.appendChild(button);
+  }
+  const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';
+  node.append(bar,content);renderPfTab('entender');
+ }else{
+  for(const sentence of [description,limit].filter(Boolean)){
+   const p=document.createElement('p');p.textContent=sentence;node.appendChild(p);
+  }
+  if(equation){const p=document.createElement('div');p.className='equation';p.textContent=equation;node.insertBefore(p,node.children[1]||null);}
+ }
+ document.getElementById('infoDialog').showModal();
+}
 document.addEventListener('input',event=>{const input=event.target;if(!input.matches('[data-field]'))return;const raw=input.value.trim().replace(',','.');data[selected][input.dataset.field]=raw===''?null:Number(raw);render();});
-document.addEventListener('click',event=>{const tab=event.target.closest('[data-moment]');if(tab){selected=tab.dataset.moment;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===tab));renderFields();render();return;}const card=event.target.closest('[data-info]');if(card)info(card.dataset.info);});
+document.addEventListener('click',event=>{const tab=event.target.closest('[data-moment]');if(tab){selected=tab.dataset.moment;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===tab));renderFields();render();return;}const pfTab=event.target.closest('[data-pf-tab]');if(pfTab){renderPfTab(pfTab.dataset.pfTab);return;}const card=event.target.closest('[data-info]');if(card)info(card.dataset.info);});
 document.getElementById('reset').onclick=()=>{data=structuredClone(original);renderFields();render();};document.getElementById('closeDialog').onclick=()=>document.getElementById('infoDialog').close();
 renderFields();render();

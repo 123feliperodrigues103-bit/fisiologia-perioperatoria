@@ -1,19 +1,13 @@
-# Gasometria pareada — protótipo v0.1
+# Fisiologia Perioperatória — v0.2
 
-Primeiro protótipo da plataforma acadêmica **Fisiologia Perioperatória**.
+Atualização da calculadora existente com ficha científica interativa da relação P/F.
 
-## Rodar localmente
-Abra `index.html` no navegador. Nenhuma instalação, comando ou dependência é necessária.
+## Uso
+Abra `index.html` no navegador ou publique os três arquivos em sua hospedagem estática.
 
-## Publicar
-1. Crie um repositório GitHub (pode ser público) chamado `fisiologia-perioperatoria`.
-2. Adicione `index.html`, `styles.css`, `script.js` e `README.md` **na raiz** do repositório, não dentro de uma subpasta.
-3. Na Vercel, **Add New > Project > Import Git Repository** e selecione o repositório.
-4. Se solicitado, selecione **Framework Preset: Other**, **Build Command: vazio** e **Output Directory: .** (raiz).
-5. Clique em **Deploy**. A Vercel fornecerá o endereço efetivo.
+- Clique no cartão **Relação P/F**.
+- Navegue por **Entender**, **Fórmula**, **Limitações** e **Referências**.
+- Na aba Fórmula, o exemplo usa o momento e os valores atualmente selecionados.
+- Para validar, alterne T0/Tfinal e confira P/F = 363,4/321,4 mmHg.
 
-## Validação
-Cálculos educacionais preliminares: P/F, ΔPCO₂, ΔpH, CaO₂, CcvO₂ estimado, diferença de conteúdos e extração central estimada. Não validado para decisões clínicas. Não calcula DO₂ ou VO₂ sem débito cardíaco e dados apropriados.
-
-## Dados
-Caso 001 sem identificadores. Em ambos os momentos usa Hb arterial como aproximação de Hb venosa, explicitado na interface.
+Não substitui decisões clínicas. O conteúdo educacional está sujeito a revisão editorial.
