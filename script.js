@@ -8,17 +8,36 @@ const EXAMPLE={
   ]
 };
 const profileGroups=[['age','Idade','anos'],['sex','Sexo para PBW',''],['height','Altura','cm'],['weight','Peso real','kg'],['description','Descrição didática','']];
+// Os identificadores dos campos antigos são preservados no armazenamento local e no JSON.
+// O formulário mostra apenas as medidas mais úteis; parâmetros avançados são recolhíveis.
 const fields={
- arterialFields:[['fio2','FiO₂','%'],['hb','Hb arterial','g/dL'],['aph','pH',''],['apo2','PaO₂','mmHg'],['apco2','PaCO₂','mmHg'],['aso2','SaO₂','%'],['hco3','HCO₃⁻','mEq/L'],['lactate','Lactato','mmol/L']],
- venousFields:[['hbv','Hb venosa opcional','g/dL'],['vph','pH venoso',''],['vpo2','PcvO₂','mmHg'],['vpco2','PcvCO₂','mmHg'],['vso2','ScvO₂','%']],
- ventFields:[['vt','VC expirado','mL'],['vti','VC inspirado','mL'],['rr','FR total','irpm'],['minute','Ventilação-minuto medida','L/min'],['etco2','EtCO₂','mmHg'],['eto2','EtO₂ tele-expiratório','%'],['feo2','O₂ expirado misto','%']],
- mechanicalFields:[['peep','PEEP programada','cmH₂O'],['peepi','Auto-PEEP medida','cmH₂O'],['peeptotal','PEEP total medida','cmH₂O'],['pplat','Pplat','cmH₂O'],['ppeak','Ppico','cmH₂O'],['flow','Fluxo constante','L/min'],['ti','Tempo inspiratório','s'],['passive','Paciente passivo (1=sim)','0 ou 1']],
- hemoFields:[['co','Débito cardíaco','L/min'],['hr','Frequência cardíaca','bpm'],['map','PAM','mmHg'],['cvp','PVC','mmHg'],['pb','Pressão barométrica','mmHg'],['rq','Quociente respiratório assumido','']]
+ arterialFields:[['fio2','FiO₂','%'],['hb','Hb arterial','g/dL'],['aph','pH',''],['apo2','PaO₂','mmHg'],['apco2','PaCO₂','mmHg'],['aso2','SaO₂','%'],['hco3','HCO₃⁻ informado','mmol/L']],
+ venousFields:[['hbv','Hb venosa · opcional','g/dL'],['vph','pH venoso',''],['vpo2','PcvO₂','mmHg'],['vpco2','PcvCO₂','mmHg'],['vso2','ScvO₂','%']],
+ ventFields:[['vt','VC expirado','mL'],['rr','FR total','irpm'],['minute','VM medido','L/min'],['pause','Pausa inspiratória','%'],['ieratio','Relação I:E (ex.: 1:2)',''],['pplat','Platô (Pplat)','cmH₂O'],['peep','PEEP','cmH₂O'],['ppeak','Pico (Ppico)','cmH₂O']],
+ hemoFields:[['co','Débito cardíaco','L/min'],['hr','FC','bpm'],['map','PAM','mmHg'],['cvp','PVC','mmHg']],
+ advancedFields:[['pb','Pressão barométrica','mmHg'],['rq','Quociente respiratório assumido','']],
+ acidFields:[['na','Sódio (Na⁺)','mmol/L'],['k','Potássio (K⁺)','mmol/L'],['cl','Cloreto (Cl⁻)','mmol/L'],['lactate','Lactato','mmol/L'],['caion','Cálcio ionizado','mmol/L'],['mg','Magnésio','mmol/L'],['albumin','Albumina','g/dL'],['phosphate','Fosfato inorgânico','mmol/L']]
 };
+const legacyNumberKeys=['vti','peepi','peeptotal','flow','ti','passive','etco2','eto2','feo2'];
+function ratioToNumber(text){
+ if(typeof text!=='string')return null;
+ const parts=text.trim().replaceAll(',','.').match(/^(\d+(?:\.\d+)?)\s*:\s*(\d+(?:\.\d+)?)$/);
+ if(!parts)return null;
+ const i=Number(parts[1]),e=Number(parts[2]);
+ return i>0&&e>0&&i<=20&&e/i<=30?e/i:null;
+}
 const definitions={
  pf:['Relação PaO₂/FiO₂','Índice de oxigenação arterial ajustado à FiO₂.','P/F = PaO₂ / (FiO₂ / 100)','A P/F depende de condições ventilatórias, pressão barométrica e circulação; não determina shunt ou SDRA isoladamente.'],
  dco2:['Gradiente venoso central–arterial de PCO₂','Diferença de pressões parciais de CO₂, não de conteúdos.','ΔPCO₂ = PcvCO₂ − PaCO₂','Não mede débito cardíaco ou hipoperfusão diretamente.'],
  dph:['Diferença arterial–venosa de pH','Diferença entre pH arterial e venoso central.','ΔpH = pH arterial − pH venoso','Escala logarítmica, não equivale à diferença de concentração de H⁺.'],
+ hco3a:['HCO₃⁻ arterial — Henderson–Hasselbalch','Bicarbonato calculado a partir de pH arterial e PaCO₂.','[HCO₃⁻] = 0,0301 × PaCO₂ × 10^(pH−6,1)','É matematicamente derivado dos dados de gasometria: não é uma terceira medida independente.'],
+ hco3v:['HCO₃⁻ venoso central — Henderson–Hasselbalch','Bicarbonato calculado a partir de pH venoso central e PcvCO₂.','[HCO₃⁻] = 0,0301 × PcvCO₂ × 10^(pHvenoso−6,1)','Não equivale automaticamente ao bicarbonato arterial.'],
+ hplusA:['Atividade/concentração aproximada de H⁺ arterial','Conversão da escala logarítmica de pH para concentração molar aproximada.','[H⁺] ≈ 10^(9−pH) nmol/L','pH é o logaritmo da atividade de H⁺; conversão é uma aproximação de concentração.'],
+ hplusV:['Atividade/concentração aproximada de H⁺ venoso','Conversão da escala logarítmica de pH venoso.','[H⁺] ≈ 10^(9−pHvenoso) nmol/L','Amostra venosa central não é necessariamente substituto da arterial.'],
+ sids:['SID simplificado','Diferença dos íons fortes disponíveis mais comuns.','SID simplificado = Na⁺ + K⁺ − Cl⁻ − lactato⁻','Não inclui Ca²⁺, Mg²⁺ ou outros íons fortes: não rotular como SID aparente completo.'],
+ sida:['SID aparente (SIDa)','Balanço das cargas de íons fortes medidos.','SIDa = Na⁺ + K⁺ + 2×Ca²⁺ + 2×Mg²⁺ − Cl⁻ − lactato⁻','Ca²⁺ e Mg²⁺ introduzidos em mmol/L; multiplicamos por 2 para mEq/L. Outros íons fortes não mensurados permanecem ausentes.'],
+ side:['SID efetiva (SIDe)','Soma do bicarbonato calculado e da carga dos ácidos fracos plasmáticos.','SIDe = HCO₃⁻ + Alb(g/L)×(0,123×pH−0,631) + Pi(mmol/L)×(0,309×pH−0,469)','Equação de Figge aproximada; exige pH, PCO₂, albumina e fosfato em unidades corretas.'],
+ sig:['Strong ion gap (SIG)','Diferença entre SID aparente e SID efetiva.','SIG = SIDa − SIDe','Estimativa de íons fortes não medidos, sensível a erros analíticos e às hipóteses do modelo.'] ,
  cao2:['Conteúdo arterial de O₂','Conteúdo de oxigênio associado à Hb e dissolvido.','CaO₂ = 1,34 × Hb × SaO₂/100 + 0,0031 × PaO₂','Constantes aproximadas; requer saturação arterial válida.'],
  cvo2:['Conteúdo venoso central de O₂ estimado','Conteúdo da amostra venosa central, não misto.','CcvO₂ = 1,34 × Hb_v × ScvO₂/100 + 0,0031 × PcvO₂','Se Hb venosa não for medida, utiliza-se Hb arterial como hipótese explícita.'],
  aav:['Diferença CaO₂ − CcvO₂','Diferença de conteúdos arterial e venoso central.','CaO₂ − CcvO₂','Não é necessariamente a diferença arteriovenosa mista sistêmica.'],
@@ -27,22 +46,23 @@ const definitions={
  bsa:['Superfície corporal','Estimativa pela equação de Mosteller.','SC = √(altura(cm) × peso(kg) / 3600)','É estimativa antropométrica.'],
  vtpbw:['Volume corrente por PBW','Volume expirado dividido pelo peso predito.','VC/PBW = VTe / PBW','Exige medição confiável do volume expirado.'],
  ve:['Ventilação-minuto calculada','Volume expirado multiplicado pela frequência respiratória total.','V̇E = VTe(mL) × FR / 1000','Não equivale à ventilação alveolar.'],
- dp:['Driving pressure do sistema respiratório','Diferença entre Pplat e PEEP total.','ΔP = Pplat − PEEPtotal','Exige pausa inspiratória válida, passividade e PEEP total conhecida.'],
- cstat:['Complacência estática do sistema respiratório','Volume corrente dividido pela driving pressure.','Cstat = VTe / (Pplat − PEEPtotal)','Não é complacência isolada do pulmão; depende da parede torácica.'],
- cdyn:['Complacência dinâmica aproximada','Razão VTe/(Ppico−PEEPtotal), influenciada por resistência e fluxo.','Cdyn ≈ VTe / (Ppico − PEEPtotal)','Não isola elastância. Depende de condições e modo ventilatório.'],
+ dp:['Driving pressure do sistema respiratório','Diferença entre Pplat e a PEEP informada.','ΔP ≈ Pplat − PEEP','Exige Pplat em pausa com fluxo zero e passividade; auto-PEEP relevante exige PEEP total medida. O monitor não valida essas condições.'],
+ cstat:['Complacência estática do sistema respiratório','Volume corrente dividido pela driving pressure.','Cstat ≈ VTe / (Pplat − PEEP)','Não é complacência isolada do pulmão; depende da parede torácica.'],
+ cdyn:['Complacência dinâmica aproximada','Razão VTe/(Ppico−PEEPtotal), influenciada por resistência e fluxo.','Cdyn ≈ VTe / (Ppico − PEEP)','Não isola elastância. Depende de condições e modo ventilatório.'],
  raw:['Resistência aparente','Diferença de pressões resistiva sobre fluxo inspiratório constante.','R ≈ (Ppico − Pplat) / fluxo (L/s)','Válido apenas com fluxo inspiratório constante (VCV, onda quadrada), pausa válida e paciente passivo; inclui resistência do tubo. A plataforma não verifica o modo ventilatório.'],
  etgap:['Gradiente PaCO₂–EtCO₂','Diferença entre PaCO₂ e CO₂ tele-expiratório.','PaCO₂ − EtCO₂','EtCO₂ não é CO₂ expirado misto; não calcula espaço morto sozinho.'],
  pao2:['Pressão alveolar estimada de O₂','Equação alveolar simplificada.','PAO₂ ≈ FiO₂ × (Pb − 47) − PaCO₂/R','Depende de pressão barométrica e R assumido; não é medição direta.'],
  aagrad:['Gradiente alvéolo-arterial estimado de O₂','Diferença entre PAO₂ estimada e PaO₂.','A–a = PAO₂ − PaO₂','Depende de equação alveolar simplificada e suas hipóteses.'],
  do2:['Oferta global de oxigênio','Produto de débito cardíaco informado e conteúdo arterial de O₂.','DO₂ = DC × CaO₂ × 10','Não mede perfusão microcirculatória. DC deve ser obtido independentemente.'],
  doi:['Oferta de oxigênio indexada','DO₂ dividido por superfície corporal estimada.','DO₂I = DO₂/SC','Herdadas as limitações de DO₂ e SC.'],
- ie:['Relação I:E','Relação entre tempo inspiratório e expiratório.','Te = 60/FR − Ti; I:E = 1 : Te/Ti','Pressupõe frequência e tempos representativos do ciclo.'],
+ ie:['Relação I:E','Relação inspiratória/expiratória informada no ventilador.','I:E informado como 1:x; resultado é x','Pressupõe frequência e tempos representativos do ciclo.'],
  leak:['Diferença relativa entre VTi e VTe','Diferença inspiratório-expiratória relativa ao volume inspirado.','100 × (VTi − VTe)/VTi','Não diagnostica vazamento isoladamente; sensores, compressibilidade e fluxo fresco interferem.']
 };
 const metricGroups=[
- ['GASOMETRIA',[['pf','Relação P/F','mmHg',1],['dco2','ΔPCO₂','mmHg',1],['dph','ΔpH','',2],['cao2','CaO₂','mL/dL',2],['cvo2','CcvO₂ estimado','mL/dL',2],['aav','CaO₂ − CcvO₂','mL/dL',2],['eo2','Extração central','%',1],['pao2','PAO₂ estimada','mmHg',1],['aagrad','Gradiente A–a','mmHg',1],['etgap','PaCO₂ − EtCO₂','mmHg',1]]],
- ['PACIENTE E VENTILAÇÃO',[['pbw','PBW','kg',1],['bsa','Superfície corporal','m²',2],['vtpbw','VC/PBW','mL/kg',1],['ve','Volume-minuto calculado','L/min',2],['ie','Relação I:E','',2],['leak','Diferença VTi − VTe','%',1]]],
- ['MECÂNICA E CIRCULAÇÃO',[['dp','Driving pressure','cmH₂O',1],['cstat','Complacência estática','mL/cmH₂O',1],['cdyn','Complacência dinâmica','mL/cmH₂O',1],['raw','Resistência aparente','cmH₂O·s/L',1],['do2','DO₂','mL/min',1],['doi','DO₂ indexado','mL/min/m²',1]]]
+ ['EQUILÍBRIO ACIDOBÁSICO',[['hco3a','HCO₃⁻ arterial (H–H)','mmol/L',1],['hco3v','HCO₃⁻ venoso (H–H)','mmol/L',1],['hplusA','H⁺ arterial','nmol/L',1],['hplusV','H⁺ venoso','nmol/L',1],['sids','SID simplificado','mEq/L',1],['sida','SID aparente','mEq/L',1],['side','SID efetivo','mEq/L',1],['sig','SIG','mEq/L',1]]],
+ ['GASOMETRIA E OXIGENAÇÃO',[['pf','Relação P/F','mmHg',1],['dco2','ΔPCO₂','mmHg',1],['dph','ΔpH','',2],['cao2','CaO₂','mL/dL',2],['cvo2','CcvO₂ estimado','mL/dL',2],['aav','CaO₂ − CcvO₂','mL/dL',2],['eo2','Extração central','%',1],['pao2','PAO₂ estimada','mmHg',1],['aagrad','Gradiente A–a','mmHg',1]]],
+ ['PACIENTE E VENTILAÇÃO',[['pbw','PBW','kg',1],['bsa','Superfície corporal','m²',2],['vtpbw','VC/PBW','mL/kg',1],['ve','VM calculado','L/min',2],['ie','Relação I:E','',2]]],
+ ['MECÂNICA E CIRCULAÇÃO',[['dp','Driving pressure (aprox.)','cmH₂O',1],['cstat','Complacência estática (aprox.)','mL/cmH₂O',1],['cdyn','Complacência dinâmica (aprox.)','mL/cmH₂O',1],['do2','DO₂','mL/min',1],['doi','DO₂ indexado','mL/min/m²',1]]]
 ];
 const allMetrics=metricGroups.flatMap(g=>g[1]);
 const newId=()=> 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,9);
@@ -56,27 +76,51 @@ function activeCase(){return cases.find(c=>c.id===activeId)||null;}
 function currentRecord(){const c=activeCase();return c?.records.find(r=>r.id===recordId)||c?.records[0]||null;}
 function fmt(x,places=1){return Number.isFinite(x)?x.toLocaleString('pt-BR',{minimumFractionDigits:places,maximumFractionDigits:places}):'—';}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtIE(x){return Number.isFinite(x)?'1:'+x.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2}):'—';}
 function val(d,k,min=-Infinity,max=Infinity){const x=d?.[k];return typeof x==='number'&&Number.isFinite(x)&&x>=min&&x<=max?x:null;}
 function maybe(...n){return n.every(v=>v!==null&&Number.isFinite(v));}
-function compute(d,p){const out={};const get=(k,min,max)=>val(d,k,min,max);const height=val(p,'height',100,250),weight=val(p,'weight',1,500);
+function compute(d,p){
+ const out={};const get=(k,min,max)=>val(d,k,min,max);
+ const height=val(p,'height',100,250),weight=val(p,'weight',1,500);
  const pbw=height!==null&&['masculino','feminino'].includes(p?.sex)&&height>=152.4?(p.sex==='masculino'?50:45.5)+0.91*(height-152.4):null;
  const bsa=maybe(height,weight)?Math.sqrt(height*weight/3600):null;
- const fio=get('fio2',21,100),pa=get('apo2',0,1000),pc=get('apco2',0,200),pv=get('vpco2',0,200),hb=get('hb',0.1,30),hbv=get('hbv',0.1,30),sa=get('aso2',0,100),sv=get('vso2',0,100),pvo=get('vpo2',0,1000),vte=get('vt',1,3000),vti=get('vti',1,3000),rr=get('rr',1,100),plat=get('pplat',0,100),peak=get('ppeak',0,100),peepTotal=get('peeptotal',0,50),peep=get('peep',0,50),peepi=get('peepi',0,50),flow=get('flow',0.01,200),ti=get('ti',0.05,30),dc=get('co',0.01,40),et=get('etco2',0,200);
- const knownPeep=peepTotal??(maybe(peep,peepi)?peep+peepi:null);
- const validStatic=get('passive',0,1)===1; // explicitly confirmed, not inferred
- const dp=maybe(plat,knownPeep)&&plat>knownPeep&&validStatic?plat-knownPeep:null;
- const cao2=maybe(hb,sa,pa)?1.34*hb*(sa/100)+0.0031*pa:null;
- const cvo2=maybe(hbv??hb,sv,pvo)?1.34*(hbv??hb)*(sv/100)+0.0031*pvo:null;
- const aav=maybe(cao2,cvo2)?cao2-cvo2:null;
- const pb=get('pb',200,1100),rq=get('rq',0.5,1.5);
- const pao2=maybe(fio,pc,pb,rq)?(fio/100)*(pb-47)-pc/rq:null;
- const aagrad=maybe(pao2,pa)?pao2-pa:null;
- const ie=maybe(rr,ti)&&60/rr>ti? (60/rr-ti)/ti:null;
- Object.assign(out,{pf:maybe(fio,pa)?pa/(fio/100):null,dco2:maybe(pc,pv)?pv-pc:null,dph:maybe(get('aph',6,8),get('vph',6,8))?d.aph-d.vph:null,cao2,cvo2,aav,eo2:maybe(aav,cao2)&&cao2>0?100*aav/cao2:null,pbw,bsa,vtpbw:maybe(vte,pbw)&&pbw>0?vte/pbw:null,ve:maybe(vte,rr)?vte*rr/1000:null,ie,leak:maybe(vte,vti)?100*(vti-vte)/vti:null,dp,cstat:maybe(vte,dp)&&dp>0?vte/dp:null,cdyn:maybe(vte,peak,knownPeep)&&peak>knownPeep&&validStatic?vte/(peak-knownPeep):null,raw:maybe(peak,plat,flow)&&peak>=plat&&validStatic?(peak-plat)/(flow/60):null,etgap:maybe(pc,et)?pc-et:null,pao2,aagrad,do2:maybe(dc,cao2)?10*dc*cao2:null,doi:maybe(dc,cao2,bsa)&&bsa>0?10*dc*cao2/bsa:null});
- return out;}
+ const fio=get('fio2',21,100),pa=get('apo2',0,1000),pc=get('apco2',0.1,200),pv=get('vpco2',0.1,200);
+ const hb=get('hb',0.1,30),hbv=get('hbv',0.1,30),sa=get('aso2',0,100),sv=get('vso2',0,100),pvo=get('vpo2',0,1000);
+ const vte=get('vt',1,3000),rr=get('rr',1,100),plat=get('pplat',0,100),peak=get('ppeak',0,100),peep=get('peep',0,50);
+ const dc=get('co',0.01,40),pHa=get('aph',6,8),pHv=get('vph',6,8);
+ const caO2=maybe(hb,sa,pa)?1.34*hb*(sa/100)+0.0031*pa:null;
+ const cvO2=maybe(hbv??hb,sv,pvo)?1.34*(hbv??hb)*(sv/100)+0.0031*pvo:null;
+ const avO2=maybe(caO2,cvO2)?caO2-cvO2:null;
+ const bar=get('pb',200,1100),rq=get('rq',0.5,1.5);
+ const alveolarO2=maybe(fio,pc,bar,rq)?fio/100*(bar-47)-pc/rq:null;
+ const driving=maybe(plat,peep)&&plat>peep?plat-peep:null;
+ const hco3a=maybe(pHa,pc)?0.0301*pc*Math.pow(10,pHa-6.1):null;
+ const hco3v=maybe(pHv,pv)?0.0301*pv*Math.pow(10,pHv-6.1):null;
+ const na=get('na',80,200),k=get('k',0.1,15),cl=get('cl',50,160),lactate=get('lactate',0,35),caion=get('caion',0.1,4),mg=get('mg',0.1,6);
+ const albumin=get('albumin',0,8),phosphate=get('phosphate',0,12);
+ const simpleSid=maybe(na,k,cl,lactate)?na+k-cl-lactate:null;
+ const sida=maybe(simpleSid,caion,mg)?simpleSid+2*caion+2*mg:null;
+ const chargeWeak=maybe(albumin,phosphate,pHa)?10*albumin*(0.123*pHa-0.631)+phosphate*(0.309*pHa-0.469):null;
+ const side=maybe(hco3a,chargeWeak)?hco3a+chargeWeak:null;
+ const ie=ratioToNumber(d.ieratio)??(maybe(rr,get('ti',0.05,30))&&60/rr>d.ti?(60/rr-d.ti)/d.ti:null);
+ Object.assign(out,{
+  hco3a,hco3v,hplusA:pHa===null?null:Math.pow(10,9-pHa),hplusV:pHv===null?null:Math.pow(10,9-pHv),sids:simpleSid,sida,side,sig:maybe(sida,side)?sida-side:null,
+  pf:maybe(fio,pa)?pa/(fio/100):null,dco2:maybe(pc,pv)?pv-pc:null,dph:maybe(pHa,pHv)?pHa-pHv:null,
+  cao2:caO2,cvo2:cvO2,aav:avO2,eo2:maybe(avO2,caO2)&&caO2>0?100*avO2/caO2:null,
+  pbw,bsa,vtpbw:maybe(vte,pbw)&&pbw>0?vte/pbw:null,ve:maybe(vte,rr)?vte*rr/1000:null,ie,
+  dp:driving,cstat:maybe(vte,driving)&&driving>0?vte/driving:null,
+  cdyn:maybe(vte,peak,peep)&&peak>peep?vte/(peak-peep):null,
+  pao2:alveolarO2,aagrad:maybe(alveolarO2,pa)?alveolarO2-pa:null,
+  do2:maybe(dc,caO2)?10*dc*caO2:null,doi:maybe(dc,caO2,bsa)&&bsa>0?10*dc*caO2/bsa:null
+ });
+ return out;
+}
 function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(cases));document.getElementById('saveStatus').textContent='Salvo neste navegador';}catch{document.getElementById('saveStatus').textContent='Não foi possível salvar. Exporte seus casos.';}}
 function profileHtml(c){return profileGroups.map(([key,label,unit])=>{const v=c.profile[key]??'';let control;if(key==='sex')control=`<select data-profile="${key}"><option value="">Não informado</option><option value="masculino" ${v==='masculino'?'selected':''}>Masculino (PBW)</option><option value="feminino" ${v==='feminino'?'selected':''}>Feminino (PBW)</option></select>`;else control=`<input data-profile="${key}" ${key==='description'?'type="text" maxlength="180"':`type="number" step="any" min="0"`} value="${esc(v)}" placeholder="Opcional">`;return `<div class="profile-field"><label>${label}${unit?' ('+unit+')':''}</label>${control}</div>`;}).join('');}
-function fieldsHtml(r,id){return fields[id].map(([key,label,unit])=>{const x=r.values[key];return `<div class="field"><label for="f_${key}">${label} <span class="unit">${unit}</span></label><input id="f_${key}" data-field="${key}" type="number" step="any" inputmode="decimal" value="${x===null||x===undefined?'':esc(x)}" placeholder="—"></div>`;}).join('');}
+function fieldsHtml(r,id){return fields[id].map(([key,label,unit])=>{
+ const x=r.values[key];const isText=key==='ieratio';
+ return `<div class="field"><label for="f_${key}">${label} <span class="unit">${unit}</span></label><input id="f_${key}" data-field="${key}" type="${isText?'text':'number'}" ${isText?'maxlength="12"':'step="any" inputmode="decimal"'} value="${x===null||x===undefined?'':esc(x)}" placeholder="${isText?'1:2':'—'}"></div>`;
+ }).join('');}
 function renderLayout(){const c=activeCase();document.getElementById('caseSelect').innerHTML=cases.length?cases.map(x=>`<option value="${esc(x.id)}" ${x.id===activeId?'selected':''}>${esc(x.title)}</option>`).join(''):'<option value="">Nenhum caso</option>';
  document.getElementById('caseArea').hidden=!c;document.getElementById('emptyArea').hidden=!!c;
  if(!c)return;const r=currentRecord();recordId=r?.id||null;
@@ -86,22 +130,32 @@ function renderLayout(){const c=activeCase();document.getElementById('caseSelect
  for(const id of Object.keys(fields))document.getElementById(id).innerHTML=fieldsHtml(r,id);
  renderResults();}
 function renderResults(){const c=activeCase(),r=currentRecord();if(!c||!r)return;const results=compute(r.values,c.profile);
- document.getElementById('validation').textContent='“—” indica dados insuficientes ou condições não confirmadas.';
- document.getElementById('metricCards').innerHTML=metricGroups.map(([category,items])=>`<div class="metric-group-label">${category}</div>`+items.map(([key,label,unit,places])=>`<button class="metric ${results[key]===null?'unavailable':''}" data-info="${key}"><span class="label">${label}</span><span class="number">${fmt(results[key],places)}</span><span class="unit">${unit}</span><span class="more">${results[key]===null?'Ver requisitos e fórmula':'Entender fórmula e limites'} ↗</span></button>`).join('')).join('');
+ document.getElementById('validation').textContent='Os resultados aparecem conforme dados válidos são inseridos.';
+ const cards=metricGroups.map(([category,items])=>{
+  const available=items.filter(([key])=>Number.isFinite(results[key]));
+  if(!available.length)return '';
+  return `<div class="metric-group-label">${category}</div>`+available.map(([key,label,unit,places])=>`<button class="metric" data-info="${key}"><span class="label">${label}</span><span class="number">${key==='ie'?fmtIE(results[key]):fmt(results[key],places)}</span><span class="unit">${unit}</span><span class="more">Entender fórmula e limites ↗</span></button>`).join('');
+ }).join('');
+ document.getElementById('metricCards').innerHTML=cards||'<p class="hint">Preencha os dados disponíveis. Apenas índices com requisitos satisfeitos aparecerão aqui.</p>';
  renderEvolution();}
 function renderEvolution(){const c=activeCase();if(!c)return;
- const metricSelect=document.getElementById('chartMetric'),old=metricSelect.value;metricSelect.innerHTML=allMetrics.map(([key,label])=>`<option value="${key}" ${old===key?'selected':''}>${label}</option>`).join('');
- const maxShown=Math.min(c.records.length,50);const cols=c.records.slice(0,maxShown),computed=cols.map(r=>compute(r.values,c.profile));const chosen=metricSelect.value||'pf';
+ const maxShown=Math.min(c.records.length,50),cols=c.records.slice(0,maxShown),computed=cols.map(r=>compute(r.values,c.profile));
+ const shownMetrics=allMetrics.filter(([key])=>computed.some(x=>Number.isFinite(x[key])));
+ const metricSelect=document.getElementById('chartMetric'),old=metricSelect.value;
+ metricSelect.innerHTML=shownMetrics.map(([key,label])=>`<option value="${key}" ${old===key?'selected':''}>${label}</option>`).join('');
+ const chosen=shownMetrics.some(m=>m[0]===old)?old:shownMetrics[0]?.[0];metricSelect.value=chosen||'';
  document.getElementById('compareHead').innerHTML=`<tr><th>Índice</th>${cols.map((r,i)=>`<th>R${i+1}${r.time?' · '+esc(r.time.replace('T',' ')):''}</th>`).join('')}</tr>`;
- document.getElementById('compareBody').innerHTML=allMetrics.map(([key,label,unit,places])=>`<tr><td>${esc(label)} <span class="unit">${unit}</span></td>${computed.map(x=>`<td>${fmt(x[key],places)}</td>`).join('')}</tr>`).join('');
- const points=computed.map((x,i)=>({i,v:x[chosen]})).filter(p=>Number.isFinite(p.v));const canvas=document.getElementById('chartBox');if(points.length<2){canvas.innerHTML='<div class="empty-chart">Preencha pelo menos dois registros com dados suficientes para visualizar esta variável.</div>';return;}
- const w=720,h=205,left=55,right=20,top=20,bottom=42;let min=Math.min(...points.map(p=>p.v)),max=Math.max(...points.map(p=>p.v));const pad=Math.max((max-min)*.15,Math.abs(max)*.05,.5);min-=pad;max+=pad;const x=i=>left+(w-left-right)*(cols.length===1?0:i/(cols.length-1));const y=v=>top+(h-top-bottom)*(max-v)/(max-min);
+ document.getElementById('compareBody').innerHTML=shownMetrics.map(([key,label,unit,places])=>`<tr><td>${esc(label)} <span class="unit">${unit}</span></td>${computed.map(x=>`<td>${key==='ie'&&Number.isFinite(x[key])?fmtIE(x[key]):fmt(x[key],places)}</td>`).join('')}</tr>`).join('')||'<tr><td colspan="2">Nenhum índice calculável ainda.</td></tr>';
+ const points=computed.map((x,i)=>({i,v:x[chosen]})).filter(p=>Number.isFinite(p.v));const canvas=document.getElementById('chartBox');
+ if(points.length<2){canvas.innerHTML='<div class="empty-chart">Preencha pelo menos dois registros com dados suficientes para visualizar esta variável.</div>';return;}
+ const w=720,h=205,left=55,right=20,top=20,bottom=42;let min=Math.min(...points.map(p=>p.v)),max=Math.max(...points.map(p=>p.v));const pad=Math.max((max-min)*.15,Math.abs(max)*.05,.5);min-=pad;max+=pad;
+ const x=i=>left+(w-left-right)*(cols.length===1?0:i/(cols.length-1));const y=v=>top+(h-top-bottom)*(max-v)/(max-min);
  const line=points.map(p=>`${x(p.i)},${y(p.v)}`).join(' ');
  canvas.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolução de ${esc(allMetrics.find(m=>m[0]===chosen)?.[1]||chosen)}"><g fill="none" stroke="#dfe7ee">${[0,1,2,3,4].map(i=>`<line x1="${left}" y1="${top+(h-top-bottom)*i/4}" x2="${w-right}" y2="${top+(h-top-bottom)*i/4}"/>`).join('')}</g><g font-size="11" fill="#718799">${[0,1,2,3,4].map(i=>`<text x="${left-8}" y="${top+(h-top-bottom)*i/4+4}" text-anchor="end">${fmt(max-(max-min)*i/4,1)}</text>`).join('')}${cols.map((r,i)=>`<text x="${x(i)}" y="${h-15}" text-anchor="middle">R${i+1}</text>`).join('')}</g><polyline points="${line}" fill="none" stroke="#287da6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${points.map(p=>`<circle cx="${x(p.i)}" cy="${y(p.v)}" r="4.5" fill="#287da6"><title>Registro ${p.i+1}: ${fmt(p.v,2)}</title></circle>`).join('')}</svg>`;
 }
-function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='pf'||key==='dco2'){
- const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.dataset.scienceKind=key;bar.setAttribute('role','tablist');for(const t of pfTabs){const button=document.createElement('button');button.type='button';button.textContent=t.label;button.dataset.pfTab=t.id;button.setAttribute('role','tab');bar.appendChild(button);}const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';node.append(bar,content);renderScienceTab('entender');
- }else{const p=document.createElement('p');p.textContent=description;node.appendChild(p);const eq=document.createElement('div');eq.className='equation';eq.textContent=equation;node.appendChild(eq);const r=currentRecord(),c=activeCase(),result=r&&c?compute(r.values,c.profile)[key]:null;const show=document.createElement('p');show.textContent=`Resultado do registro: ${fmt(result,2)} ${allMetrics.find(m=>m[0]===key)?.[2]||''}`;node.appendChild(show);const note=document.createElement('p');note.textContent=limit;node.appendChild(note);}document.getElementById('infoDialog').showModal();}
+function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='pf'||key==='dco2'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig'].includes(key)){
+ const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.dataset.scienceKind=['hco3a','hco3v','hplusA','hplusV'].includes(key)?'hh':(['sids','sida','side','sig'].includes(key)?'stewart':key);bar.setAttribute('role','tablist');for(const t of pfTabs){const button=document.createElement('button');button.type='button';button.textContent=t.label;button.dataset.pfTab=t.id;button.setAttribute('role','tab');bar.appendChild(button);}const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';node.append(bar,content);renderScienceTab('entender');
+ }else{const p=document.createElement('p');p.textContent=description;node.appendChild(p);const eq=document.createElement('div');eq.className='equation';eq.textContent=equation;node.appendChild(eq);const r=currentRecord(),c=activeCase(),result=r&&c?compute(r.values,c.profile)[key]:null;const show=document.createElement('p');show.textContent=`Resultado do registro: ${key==='ie'&&Number.isFinite(result)?fmtIE(result):fmt(result,2)} ${allMetrics.find(m=>m[0]===key)?.[2]||''}`;node.appendChild(show);const note=document.createElement('p');note.textContent=limit;node.appendChild(note);}document.getElementById('infoDialog').showModal();}
 
 const pfTabs = [
  {id:'entender',label:'Entender'},
@@ -206,6 +260,22 @@ function dco2Panel(tab){
   <p><strong>Contexto:</strong> a aplicação clínica do limiar de 6 mmHg deriva da literatura de terapia intensiva; não é uma equação fisiológica universal apresentada nesses capítulos.</p>
   <p class="subtle">Síntese educacional original baseada nas fontes selecionadas para o projeto. Referências por capítulo, sem atribuição de páginas não verificadas.</p>`;
 }
+function hhPanel(tab){
+ const d=currentRecord()?.values||{},r=compute(d,activeCase()?.profile||{});
+ const arterial=Number.isFinite(r.hco3a)?`pH arterial ${fmt(d.aph,2)} · PaCO₂ ${fmt(d.apco2,1)} mmHg → HCO₃⁻ ${fmt(r.hco3a,1)} mmol/L`:'Dados arteriais incompletos';
+ const venous=Number.isFinite(r.hco3v)?`pH venoso ${fmt(d.vph,2)} · PcvCO₂ ${fmt(d.vpco2,1)} mmHg → HCO₃⁻ ${fmt(r.hco3v,1)} mmol/L`:'Dados venosos incompletos';
+ if(tab==='entender')return `<h3>O sistema bicarbonato–CO₂</h3><p>Henderson–Hasselbalch descreve o equilíbrio entre bicarbonato e CO₂ dissolvido no plasma. O pH depende da <strong>relação</strong> entre essas grandezas, não apenas do bicarbonato isolado.</p><div class="concept-note">A equação não compete com Stewart: ambas descrevem o mesmo sistema físico-químico, sob diferentes escolhas de variáveis explicativas.</div><p>Na gasometria, o pH e a PCO₂ costumam ser medidos; o bicarbonato apresentado pelo aparelho geralmente é <strong>calculado</strong> a partir deles.</p>`;
+ if(tab==='formula')return `<h3>Equação a 37 °C</h3><div class="equation equation-large">pH = 6,1 + log₁₀ { [HCO₃⁻] / (0,0301 × PCO₂) }</div><div class="equation">[HCO₃⁻] = 0,0301 × PCO₂ × 10^(pH−6,1)</div><p>PCO₂ em mmHg; HCO₃⁻ em mmol/L; 0,0301 é a solubilidade aparente aproximada de CO₂ no plasma.</p><div class="worked-example"><span class="eyebrow">REGISTRO ATUAL</span><p>${arterial}</p><p>${venous}</p></div>`;
+ if(tab==='limites')return `<h3>Limitações e amostra utilizada</h3><ul class="science-list"><li>O bicarbonato calculado pela gasometria não é prova independente de uma alteração metabólica.</li><li>A relação usa constantes aproximadas para temperatura corporal habitual.</li><li>Amostras arterial e venosa central podem ter pH e PCO₂ diferentes, sobretudo em distúrbios circulatórios.</li><li>Não converta automaticamente pH venoso em arterial somando uma diferença fixa.</li><li>Henderson–Hasselbalch descreve a relação química; não determina, isoladamente, a causa da acidose.</li></ul>`;
+ return `<h3>Referências</h3><ol class="science-list"><li><em>Fundamentals of Arterial Blood Gas Interpretation</em> (2022), revisão da equação de Henderson–Hasselbalch e método de medição de gasometria.</li><li><em>The Stewart Approach — One Clinician's Perspective</em> (2009), conexão entre bicarbonato e modelo físico-químico.</li></ol><p>Links: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9416819/" target="_blank" rel="noopener noreferrer">gasometria</a> e <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2702213/" target="_blank" rel="noopener noreferrer">Stewart</a>.</p>`;
+}
+function stewartPanel(tab){
+ const d=currentRecord()?.values||{},r=compute(d,activeCase()?.profile||{});
+ if(tab==='entender')return `<h3>Stewart: as três variáveis independentes</h3><p>No modelo físico-químico, o pH é determinado pela <strong>PCO₂</strong>, pela <strong>diferença de íons fortes (SID)</strong> e pela quantidade total de <strong>ácidos fracos não voláteis (Aₜₒₜ)</strong>, principalmente albumina e fosfato.</p><p>O bicarbonato resulta do equilíbrio químico e da eletroneutralidade; não é uma variável independente nesse modelo.</p><div class="concept-note">Reduzir a SID, mantidas as demais condições, desloca o sistema na direção acidificante. Reduzir albumina tende a exercer efeito alcalinizante. Isso descreve efeitos físico-químicos, não um diagnóstico automático.</div>`;
+ if(tab==='formula')return `<h3>Eletroneutralidade e equações</h3><div class="equation">SID simplificado = Na⁺ + K⁺ − Cl⁻ − lactato⁻</div><div class="equation">SIDa = Na⁺ + K⁺ + 2×[Ca²⁺] + 2×[Mg²⁺] − Cl⁻ − lactato⁻</div><div class="equation">SIDe ≈ HCO₃⁻(H–H) + Alb(g/L)×(0,123×pH−0,631) + Pi(mmol/L)×(0,309×pH−0,469)</div><div class="equation">SIG = SIDa − SIDe</div><p>Cálcio ionizado e magnésio devem ser informados em mmol/L e são convertidos para cargas equivalentes. Albumina é digitada em g/dL e convertida internamente para g/L.</p><div class="worked-example"><span class="eyebrow">REGISTRO ATUAL</span><p>SID simplificado: <strong>${fmt(r.sids,1)} mEq/L</strong></p><p>SIDa: <strong>${fmt(r.sida,1)} mEq/L</strong></p><p>SIDe: <strong>${fmt(r.side,1)} mEq/L</strong></p><p>SIG: <strong>${fmt(r.sig,1)} mEq/L</strong></p></div>`;
+ if(tab==='limites')return `<h3>Premissas e armadilhas</h3><ul class="science-list"><li>SID simplificado não equivale a SIDa completo: faltam íons divalentes e outros íons fortes.</li><li>O SIG é estimativa dos íons fortes não mensurados; não mede uma substância específica.</li><li>A equação de Figge é uma aproximação em condições fisiológicas: extremos de pH e erros laboratoriais reduzem a confiabilidade.</li><li>Use resultados de amostras temporalmente comparáveis. O cálculo de SIDe/SIG aqui utiliza pH e PCO₂ <strong>arteriais</strong>.</li><li>As unidades importam: albumina g/dL→g/L; Ca²⁺ e Mg²⁺ em mmol/L→mEq/L.</li></ul>`;
+ return `<h3>Referências</h3><ol class="science-list"><li><em>The Stewart Approach — One Clinician's Perspective</em>, Critical Care (2009), equações de SIDe/Figge.</li><li><em>Bench-to-bedside review: Fundamental principles of acid-base physiology</em>, Critical Care (2005), eletroneutralidade e SID/SIG.</li></ol><p>Links: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2702213/" target="_blank" rel="noopener noreferrer">Stewart</a> e <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC1175910/" target="_blank" rel="noopener noreferrer">princípios físico-químicos</a>.</p>`;
+}
 function renderScienceTab(tab){
  const bar=document.getElementById('pfTabBar');
  if(!bar)return;
@@ -215,7 +285,7 @@ function renderScienceTab(tab){
   button.setAttribute('aria-selected',String(active));
  });
  const kind=bar.dataset.scienceKind;
- document.getElementById('pfTabContent').innerHTML=kind==='dco2'?dco2Panel(tab):pfPanel(tab);
+ document.getElementById('pfTabContent').innerHTML=kind==='dco2'?dco2Panel(tab):kind==='hh'?hhPanel(tab):kind==='stewart'?stewartPanel(tab):pfPanel(tab);
 }
 function switchCase(id){activeId=id;recordId=activeCase()?.records[0]?.id||null;renderLayout();}
 function update(){save();renderResults();}
@@ -228,8 +298,8 @@ document.getElementById('deleteRecord').onclick=()=>{const c=activeCase(),r=curr
 document.getElementById('deleteCase').onclick=()=>{const c=activeCase();if(!c||!confirm(`Excluir o caso “${c.title}” e todos os seus registros?`))return;cases=cases.filter(x=>x.id!==c.id);activeId=cases[0]?.id||null;recordId=cases[0]?.records[0]?.id||null;save();renderLayout();};
 document.getElementById('exportCases').onclick=()=>{const blob=new Blob([JSON.stringify({format:'fisiologia-perioperatoria-cases-v04',exportedAt:new Date().toISOString(),cases},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='fisiologia-perioperatoria-casos.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 document.getElementById('importCases').onclick=()=>document.getElementById('importFile').click();
-document.getElementById('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5e6)throw Error('Arquivo maior que 5 MB.');const raw=JSON.parse(await file.text());if(raw.format!=='fisiologia-perioperatoria-cases-v04'||!Array.isArray(raw.cases)||raw.cases.length>1000||!raw.cases.every(validCase))throw Error('Formato de arquivo inválido.');if(!confirm(`Importar ${raw.cases.length} caso(s)? Os novos casos serão adicionados aos existentes.`))return;for(const imported of raw.cases){const c=structuredClone(imported);c.id=newId();c.title=c.title.slice(0,100);c.records.forEach(r=>{r.id=newId();r.note=r.note.slice(0,180);r.time=r.time.slice(0,16);const filtered={};for(const k of Object.values(fields).flat().map(x=>x[0]))if(typeof r.values[k]==='number'&&Number.isFinite(r.values[k]))filtered[k]=r.values[k];r.values=filtered;});const p=c.profile;c.profile={age:val(p,'age',0,125),sex:['masculino','feminino'].includes(p.sex)?p.sex:'',height:val(p,'height',0,250),weight:val(p,'weight',0,500),description:String(p.description||'').slice(0,180)};cases.push(c);}activeId=cases.at(-1)?.id||null;recordId=activeCase()?.records[0]?.id||null;save();renderLayout();}catch(err){alert('Não foi possível importar: '+err.message);}finally{e.target.value='';}};
-document.addEventListener('input',e=>{const target=e.target;const r=currentRecord(),c=activeCase();if(!r||!c)return;if(target.matches('[data-field]')){const raw=target.value.trim().replace(',','.');r.values[target.dataset.field]=raw===''?null:Number(raw);update();}else if(target.matches('[data-profile]')&&target.tagName!=='SELECT'){const k=target.dataset.profile;const raw=target.value.trim().replace(',','.');c.profile[k]=k==='description'?target.value:(raw===''?null:Number(raw));update();}else if(target.id==='recordNote'){r.note=target.value;save();}});
+document.getElementById('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5e6)throw Error('Arquivo maior que 5 MB.');const raw=JSON.parse(await file.text());if(raw.format!=='fisiologia-perioperatoria-cases-v04'||!Array.isArray(raw.cases)||raw.cases.length>1000||!raw.cases.every(validCase))throw Error('Formato de arquivo inválido.');if(!confirm(`Importar ${raw.cases.length} caso(s)? Os novos casos serão adicionados aos existentes.`))return;for(const imported of raw.cases){const c=structuredClone(imported);c.id=newId();c.title=c.title.slice(0,100);c.records.forEach(r=>{r.id=newId();r.note=r.note.slice(0,180);r.time=r.time.slice(0,16);const filtered={};for(const k of [...Object.values(fields).flat().map(x=>x[0]),...legacyNumberKeys])if(typeof r.values[k]==='number'&&Number.isFinite(r.values[k]))filtered[k]=r.values[k];if(typeof r.values.ieratio==='string'&&r.values.ieratio.length<=12)filtered.ieratio=r.values.ieratio;r.values=filtered;});const p=c.profile;c.profile={age:val(p,'age',0,125),sex:['masculino','feminino'].includes(p.sex)?p.sex:'',height:val(p,'height',0,250),weight:val(p,'weight',0,500),description:String(p.description||'').slice(0,180)};cases.push(c);}activeId=cases.at(-1)?.id||null;recordId=activeCase()?.records[0]?.id||null;save();renderLayout();}catch(err){alert('Não foi possível importar: '+err.message);}finally{e.target.value='';}};
+document.addEventListener('input',e=>{const target=e.target;const r=currentRecord(),c=activeCase();if(!r||!c)return;if(target.matches('[data-field]')){const raw=target.value.trim().replace(',','.');r.values[target.dataset.field]=target.dataset.field==='ieratio'?(raw||null):(raw===''?null:Number(raw));update();}else if(target.matches('[data-profile]')&&target.tagName!=='SELECT'){const k=target.dataset.profile;const raw=target.value.trim().replace(',','.');c.profile[k]=k==='description'?target.value:(raw===''?null:Number(raw));update();}else if(target.id==='recordNote'){r.note=target.value;save();}});
 document.addEventListener('change',e=>{if(e.target.matches('[data-profile]')){const c=activeCase();if(c){c.profile[e.target.dataset.profile]=e.target.value;update();}}if(e.target.id==='recordTime'){const r=currentRecord();if(r){r.time=e.target.value;save();renderLayout();}}if(e.target.id==='chartMetric')renderEvolution();});
 document.addEventListener('click',e=>{const tab=e.target.closest('[data-record]');if(tab){recordId=tab.dataset.record;renderLayout();return;}const scienceTab=e.target.closest('[data-pf-tab]');if(scienceTab){renderScienceTab(scienceTab.dataset.pfTab);return;}const card=e.target.closest('[data-info]');if(card)info(card.dataset.info);});
 document.getElementById('closeDialog').onclick=()=>document.getElementById('infoDialog').close();

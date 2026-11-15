@@ -25,3 +25,14 @@ dialog:has(.pf-tabs){max-width:730px;max-height:min(88vh,850px);overflow-y:auto}
 @media(max-width:800px){.profile-fields{grid-template-columns:repeat(3,minmax(0,1fr))}.inputs{grid-template-columns:1fr}.section-heading{flex-wrap:wrap}}
 @media(max-width:570px){.profile-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.record-toolbar{flex-direction:column;align-items:stretch}.record-toolbar label{width:100%}.case-toolbar button{flex:1}.case-toolbar .case-pick{flex-basis:100%}}
 .metric-group-label{grid-column:1/-1;font-size:11px;font-weight:750;letter-spacing:.12em;color:#387a99;margin:9px 0 -4px}
+
+/* v0.5 — formulário reduzido e módulo físico-químico opcional */
+.inputs .acid-panel{grid-column:1/-1;background:#fcfdff}
+.acid-panel .section-heading h2{margin:5px 0 0}
+.optional-panel{margin-top:18px;border:1px solid #e2ebf1;border-radius:11px;background:#f8fafc;padding:0 14px}
+.optional-panel summary{padding:13px 3px;cursor:pointer;font-weight:700;color:#315d77;font-size:13px}
+.optional-panel[open]{padding-bottom:15px}
+.optional-panel .fields{margin-top:4px;grid-template-columns:repeat(4,minmax(0,1fr))}
+#metricCards .hint{grid-column:1/-1}
+@media(max-width:800px){.optional-panel .fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:570px){.optional-panel .fields{grid-template-columns:repeat(2,minmax(0,1fr))}}

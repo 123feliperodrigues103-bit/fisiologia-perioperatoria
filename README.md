@@ -1,26 +1,35 @@
-# Fisiologia Perioperatória — v0.4
+# Fisiologia Perioperatória — v0.5
 
-Plataforma educacional estática (HTML/CSS/JS) para casos fictícios ou desidentificados, registros seriados e fórmulas fisiológicas calculadas independentemente. **Não validada para decisões assistenciais. Não insira dados identificáveis de pacientes.**
+Plataforma educacional estática para casos fictícios/desidentificados, com registros seriados, gráficos, fichas científicas e backup em JSON.
 
-## Usar
+## Novidades
 
-Abra `index.html` no navegador. Escolha **Novo caso** ou **Carregar exemplo**. Complete informações opcionais do caso, crie quantos registros desejar e adicione só os dados disponíveis. Os cartões atualizam os cálculos de acordo com cada variável necessária; o gráfico e a tabela mostram evolução até 50 registros (os demais permanecem salvos e podem ser consultados individualmente). Clique em P/F ou ΔPCO₂ para abrir as quatro abas de conteúdo científico já existentes.
+- Ventilação reduzida aos campos usuais do carrinho: VC expirado, FR, VM, pausa inspiratória, I:E, Pplat, PEEP e Ppico. A FiO₂ permanece na seção de gasometria arterial.
+- Módulo de equilíbrio acidobásico com bicarbonato calculado por Henderson–Hasselbalch (arterial e venoso central), H⁺, SID simplificado, SID aparente, SID efetiva e SIG.
+- Detalhes de eletrólitos e condições avançadas recolhíveis; apenas resultados que podem ser calculados aparecem.
+- ΔpH preservado como resultado descritivo, sem ficha extensa.
+- Fichas científicas para Henderson–Hasselbalch e Stewart, além das existentes para P/F e ΔPCO₂.
 
-## Persistência
+## Requisitos científicos e limites
 
-Dados armazenados somente no `localStorage` do navegador/origem. Não há backend, conta ou sincronização; limpar dados do navegador pode apagá-los. Use **Exportar JSON** como backup; **Importar JSON** adiciona casos. Faça backups antes de mudar de navegador, dispositivo ou hospedagem. Evite incluir dados reais identificáveis mesmo no JSON exportado.
+- HCO₃⁻ calculado de pH e PCO₂ NÃO é uma medida independente.
+- SID simplificado = Na + K − Cl − lactato (mmol/L monovalentes). SIDa também inclui 2×Ca²⁺ e 2×Mg²⁺ fornecidos em mmol/L.
+- SIDe: HCO₃⁻ arterial calculado + albumina (convertida de g/dL para g/L) × (0,123pH−0,631) + fosfato (mmol/L) × (0,309pH−0,469).
+- SIG = SIDa−SIDe. É estimativa, não identificação de uma substância.
+- Para driving pressure e complacência com um único campo PEEP, assume-se que a PEEP informada representa adequadamente a PEEP total e que Pplat foi medida corretamente em paciente passivo. A interface NÃO verifica essas premissas; os resultados são rotulados como aproximações.
+- A entrada de pausa inspiratória (%) é apenas registro; não certifica pausa válida ou paciente passivo.
+- Os dados venosos NÃO são automaticamente corrigidos por +0,03 para inferir valores arteriais.
 
-## Fisiologia e regras de cálculo
+## Compatibilidade de dados
 
-- Cada indicador depende apenas de seus próprios campos. Ausência ou dado inválido gera **—** no resultado correspondente.
-- **PBW** pela fórmula adulta ARDSNet, quando sexo de referência e estatura de pelo menos 152,4 cm estão presentes; **SC** pela fórmula de Mosteller.
-- Mecânica estática exige `Paciente passivo = 1`, Pplat e PEEP total informada **ou** PEEP programada + auto-PEEP medida. Não se presume que a PEEP programada seja igual à total quando auto-PEEP não foi informada.
-- Resistência é aproximação válida apenas para fluxo inspiratório constante com condições apropriadas; requer confirmação de passividade, mas a interface não consegue verificar o modo ventilatório. Usuário deve observar essas limitações.
-- **PAO₂** e **A–a** exigem pressão barométrica e R inseridos explicitamente, evitando inventar condições ambientais.
-- **DO₂** exige DC informado; não é inferido de P/F ou gradiente CO₂.
-- A plataforma não calcula VO₂ por Fick de amostra venosa central, nem VO₂ por diferença simples entre FiO₂ e EtO₂.
-- Fichas científicas detalhadas existentes: P/F e ΔPCO₂. Outras fichas são resumos preliminares; capítulos Miller e Barash são referências científicas gerais do projeto.
+O armazenamento local e o formato de exportação/importação usam o mesmo identificador da v0.4. Casos existentes devem continuar disponíveis ao atualizar os arquivos no mesmo domínio. O novo campo I:E é texto (ex.: `1:2`); os demais são numéricos. Arquivos JSON da v0.4 continuam importáveis.
 
-## Publicação
+**Antes da atualização, exporte o JSON dos seus casos.** Dados de exemplo/fictícios apenas: JSON não é criptografado. Teste localmente no navegador antes de publicar.
 
-Substitua `index.html`, `script.js`, `styles.css` e `README.md` no repositório; teste localmente antes de commit/push. Site hospedado em Vercel pode servir os mesmos arquivos estáticos.
+## Fontes científicas auxiliares
+
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC9416819/
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC2702213/
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC1175910/
+
+Não validado para diagnóstico ou orientação terapêutica; uso educacional.
