@@ -69,7 +69,7 @@ const definitions={
 const metricGroups=[
  ['EQUILÍBRIO ACIDOBÁSICO',[['hco3a','HCO₃⁻ arterial (H–H)','mmol/L',1],['hco3v','HCO₃⁻ venoso (H–H)','mmol/L',1],['hplusA','H⁺ arterial','nmol/L',1],['hplusV','H⁺ venoso','nmol/L',1],['sidnacl','Na⁺ − Cl⁻ (SID aprox.)','mmol/L',1],['sids','SID simplificado','mEq/L',1],['sida','SID aparente','mEq/L',1],['side','SID efetivo','mEq/L',1],['sig','SIG','mEq/L',1],['ag','Ânion gap (sem K⁺)','mmol/L',1],['agcorr','AG corrigido (albumina)','mmol/L',1]]],
  ['COMPENSAÇÃO ACIDOBÁSICA',[['pco2exp','PaCO₂ esperada','mmHg',1],['hco3exp','HCO₃⁻ esperado','mmol/L',1]]],
- ['GASOMETRIA E OXIGENAÇÃO',[['pf','Relação P/F','mmHg',1],['dco2','ΔPCO₂','mmHg',1],['dph','ΔpH medido','',2],['phest','pH arterial ≈ (estimativa)','aproximado',2],['cao2','CaO₂','mL/dL',2],['cvo2','CcvO₂ estimado','mL/dL',2],['aav','CaO₂ − CcvO₂','mL/dL',2],['eo2','Extração central','%',1],['pao2','PAO₂ estimada','mmHg',1],['aagrad','Gradiente A–a','mmHg',1]]],
+ ['GASOMETRIA E OXIGENAÇÃO',[['pf','Relação P/F','mmHg',1],['dco2','ΔPCO₂','mmHg',1],['dph','ΔpH medido','',2],['phest','pH arterial ≈ (estimativa)','aproximado',2],['cao2','CaO₂','mL/dL',2],['cvo2','CcvO₂ calculado','mL/dL',2],['aav','C(a−cv)O₂','mL/dL',2],['eo2','Extração central estimada','%',1],['pao2','PAO₂ estimada','mmHg',1],['aagrad','Gradiente A–a','mmHg',1]]],
  ['PACIENTE E VENTILAÇÃO',[['pbw','PBW','kg',1],['bsa','Superfície corporal','m²',2],['vtpbw','VC/PBW','mL/kg',1],['ve','VM calculado','L/min',2],['ie','Relação I:E','',2]]],
  ['MECÂNICA E CIRCULAÇÃO',[['dp','Driving pressure (aprox.)','cmH₂O',1],['cstat','Complacência estática (aprox.)','mL/cmH₂O',1],['cdyn','Complacência dinâmica (aprox.)','mL/cmH₂O',1],['do2','DO₂','mL/min',1],['doi','DO₂ indexado','mL/min/m²',1]]]
 ];
@@ -217,7 +217,7 @@ function renderEvolution(){const c=activeCase();if(!c)return;
  const line=points.map(p=>`${x(p.i)},${y(p.v)}`).join(' ');
  canvas.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolução de ${esc(allMetrics.find(m=>m[0]===chosen)?.[1]||chosen)}"><g fill="none" stroke="#dfe7ee">${[0,1,2,3,4].map(i=>`<line x1="${left}" y1="${top+(h-top-bottom)*i/4}" x2="${w-right}" y2="${top+(h-top-bottom)*i/4}"/>`).join('')}</g><g font-size="11" fill="#718799">${[0,1,2,3,4].map(i=>`<text x="${left-8}" y="${top+(h-top-bottom)*i/4+4}" text-anchor="end">${fmt(max-(max-min)*i/4,1)}</text>`).join('')}${cols.map((r,i)=>`<text x="${x(i)}" y="${h-15}" text-anchor="middle">R${i+1}</text>`).join('')}</g><polyline points="${line}" fill="none" stroke="#287da6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${points.map(p=>`<circle cx="${x(p.i)}" cy="${y(p.v)}" r="4.5" fill="#287da6"><title>Registro ${p.i+1}: ${fmt(p.v,2)}</title></circle>`).join('')}</svg>`;
 }
-function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='pf'||key==='dco2'||key==='cao2'||key==='dph'||key==='phest'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig','pco2exp','hco3exp'].includes(key)){
+function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='pf'||key==='dco2'||key==='cao2'||['cvo2','aav','eo2'].includes(key)||key==='dph'||key==='phest'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig','pco2exp','hco3exp'].includes(key)){
  const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.dataset.scienceKind=['hco3a','hco3v','hplusA','hplusV'].includes(key)?'hh':(['sids','sida','side','sig'].includes(key)?'stewart':(['pco2exp','hco3exp'].includes(key)?'compensation':key));bar.setAttribute('role','tablist');for(const t of pfTabs){const button=document.createElement('button');button.type='button';button.textContent=t.label;button.dataset.pfTab=t.id;button.setAttribute('role','tab');bar.appendChild(button);}const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';node.append(bar,content);renderScienceTab('entender');
  }else{const p=document.createElement('p');p.textContent=description;node.appendChild(p);const eq=document.createElement('div');eq.className='equation';eq.textContent=equation;node.appendChild(eq);const r=currentRecord(),c=activeCase(),result=r&&c?compute(r.values,c.profile)[key]:null;const show=document.createElement('p');show.textContent=`Resultado do registro: ${key==='ie'&&Number.isFinite(result)?fmtIE(result):fmt(result,2)} ${allMetrics.find(m=>m[0]===key)?.[2]||''}`;node.appendChild(show);const note=document.createElement('p');note.textContent=limit;node.appendChild(note);}document.getElementById('infoDialog').showModal();}
 
@@ -461,6 +461,80 @@ function dphPanel(tab){
   <p>As referências de artigos são as citadas no UpToDate enviado. A ficha é educacional e os detalhes originais devem ser consultados antes de inferir aplicabilidade a uma população específica.</p>`;
 }
 
+// Ficha 004: conteúdo venoso central e índices derivados. Descrição original,
+// baseada em Miller/Barash, Janotka & Ostadal (2021) e Li et al. (2026).
+// IMPORTANTÍSSIMO: ScvO₂ e SvO₂ não são intercambiáveis individualmente.
+function oxygenVenousPanel(tab,kind){
+ const d=currentRecord()?.values||{};
+ const hb=val(d,'hb',0.1,30),hbv=val(d,'hbv',0.1,30);
+ const sa=val(d,'aso2',0,100),sv=val(d,'vso2',0,100);
+ const pa=val(d,'apo2',0,1000),pv=val(d,'vpo2',0,1000);
+ const useHb=hbv??hb;
+ const arterial=maybe(hb,sa,pa);
+ const venous=maybe(useHb,sv,pv);
+ const ca=arterial?1.34*hb*sa/100+0.0031*pa:null;
+ const cv=venous?1.34*useHb*sv/100+0.0031*pv:null;
+ const boundV=venous?1.34*useHb*sv/100:null;
+ const dissV=venous?0.0031*pv:null;
+ const delta=maybe(ca,cv)?ca-cv:null;
+ const extraction=maybe(ca,delta)&&ca>0?100*delta/ca:null;
+ const sameHb=hbv===null||(hb!==null&&Math.abs(hbv-hb)<0.000001);
+ const satApprox=maybe(sa,sv)&&sa>0&&sameHb?100*(sa-sv)/sa:null;
+ const source=hbv!==null?'Hb venosa informada':'Hb arterial usada como aproximação da Hb venosa';
+ const current=esc(currentRecord()?.note||currentRecord()?.time||'REGISTRO ATUAL');
+ const heading=kind==='cvo2'?'Conteúdo venoso central':kind==='aav'?'Diferença de conteúdos':'Extração central estimada';
+ if(tab==='entender'){
+  const intro=kind==='cvo2'?
+    `<h3>O que resta de O₂ no sangue venoso central?</h3><p>O <strong>CcvO₂</strong> informa a quantidade de oxigênio em cada decilitro de sangue venoso central. A ScvO₂ indica a porcentagem de hemoglobina saturada; o conteúdo incorpora também a <strong>quantidade de hemoglobina</strong> e o O₂ dissolvido.</p><div class="concept-note"><strong>Exemplo:</strong> com PcvO₂ de 40 mmHg, Hb de 10 g/dL e ScvO₂ de 70%, CcvO₂ ≈ <strong>9,50 mL/dL</strong>. Se Hb cair para 7 g/dL e ScvO₂ subir para 80%, CcvO₂ cai para <strong>7,63 mL/dL</strong>. Saturação maior não significa necessariamente conteúdo maior.</div>`:
+   kind==='aav'?
+    `<h3>O que representa C(a−cv)O₂?</h3><p>É a diferença entre a quantidade de O₂ no sangue arterial e no sangue venoso <strong>central</strong> coletado em momento comparável. A diferença é uma janela para o balanço entre transporte e extração dos territórios amostrados, não uma medição direta do consumo global.</p><div class="concept-note">A diferença envolvendo sangue da artéria pulmonar (C[a−v̄]O₂) seria necessária para a aplicação sistêmica clássica do princípio de Fick. C(a−cv)O₂ <strong>não a substitui</strong>.</div>`:
+    `<h3>Quanto do conteúdo arterial não aparece no sangue venoso central?</h3><p>A <strong>extração central estimada</strong> é uma razão matemática: C(a−cv)O₂ dividido pelo CaO₂. Ela pode ajudar a comparar registros seriados com coleta semelhante, mas não mede, por si só, o consumo tecidual de O₂ nem a extração global do organismo.</p><div class="concept-note">Quando a Hb é igual nas duas amostras e a parcela dissolvida é desprezível, a razão é próxima de <strong>(SaO₂ − ScvO₂)/SaO₂</strong>. Na anemia ou na hiperóxia, essa simplificação pode perder precisão.</div>`;
+  return `${intro}<h3>Por que a coleta venosa importa?</h3><p>Amostras venosas centrais provenientes da VCS ou da junção cavoatrial representam principalmente a drenagem da parte superior do corpo. Dependendo da posição da ponta e do local de aspiração, pode haver mistura com sangue da VCI e do seio coronariano. Não se deve tratar essas amostras como sangue venoso <strong>misto</strong> da artéria pulmonar.</p><p>A saturação venosa pode ser alterada por oferta arterial, concentração de Hb, distribuição regional de fluxo e consumo metabólico. Sedação, anestesia, anemia, mudança de débito e hipoxemia podem agir em direções diferentes.</p><p>Na metanálise perioperatória de Li et al. (2026), ScvO₂ e SvO₂ apresentaram correlação, mas <strong>não foram intercambiáveis em pacientes individuais</strong>.</p>`;
+ }
+ if(tab==='formula'){
+  const common=`<p>Unidades: Hb em g/dL; saturações em % convertidas em fração; PO₂ em mmHg; conteúdos em <strong>mL O₂/dL</strong>. Coeficientes aproximados: 1,34 mL O₂/g Hb e 0,0031 mL O₂/(dL·mmHg).</p>`;
+  if(kind==='cvo2')return `<h3>Equação do conteúdo venoso central</h3><div class="equation equation-large">CcvO₂ = 1,34 × Hbᵥ × (ScvO₂/100) + 0,0031 × PcvO₂</div>${common}
+   <div class="worked-example"><span class="eyebrow">CÁLCULO DINÂMICO · ${current}</span>
+    <p>Hb utilizada: <strong>${fmt(useHb,2)} g/dL</strong> · ScvO₂: <strong>${fmt(sv,1)}%</strong> · PcvO₂: <strong>${fmt(pv,1)} mmHg</strong></p>
+    <p><strong>Origem da Hb:</strong> ${esc(source)}.</p>
+    ${venous?`<p>Ligado à Hb: <strong>${fmt(boundV,3)} mL/dL</strong> · Dissolvido: <strong>${fmt(dissV,3)} mL/dL</strong></p><div class="worked-result">CcvO₂ = <strong>${fmt(cv,3)} mL O₂/dL</strong></div>`:'<div class="worked-result">Informe ScvO₂, PcvO₂ e Hb arterial ou venosa válida para calcular CcvO₂.</div>'}
+   </div><p>Se a Hb venosa não foi informada, a Hb arterial é uma <strong>aproximação assumida</strong>, não uma medida de Hb venosa.</p>`;
+  if(kind==='aav')return `<h3>Diferença arterial–venosa central de conteúdo</h3><div class="equation equation-large">C(a−cv)O₂ = CaO₂ − CcvO₂</div>${common}
+   <div class="worked-example"><span class="eyebrow">CÁLCULO DINÂMICO · ${current}</span>
+    <p>CaO₂ = <strong>${fmt(ca,3)}</strong> · CcvO₂ = <strong>${fmt(cv,3)}</strong> mL/dL</p>
+    <div class="worked-result">${delta!==null?`C(a−cv)O₂ = ${fmt(ca,3)} − ${fmt(cv,3)} = <strong>${fmt(delta,3)} mL O₂/dL</strong>`:'Informe Hb, SaO₂, PaO₂, ScvO₂ e PcvO₂ para calcular a diferença.'}</div>
+    <p><strong>Hb da parcela venosa:</strong> ${esc(source)}.</p>
+   </div><p>Esta diferença não equivale a VO₂ (mL/min). O princípio de Fick sistêmico exige fluxo sanguíneo e <strong>conteúdo venoso misto</strong>, não apenas venoso central.</p>`;
+  return `<h3>Extração central por conteúdos</h3><div class="equation equation-large">EO₂,cv (%) = 100 × [CaO₂ − CcvO₂] / CaO₂</div>${common}
+   <div class="worked-example"><span class="eyebrow">CÁLCULO DINÂMICO · ${current}</span>
+    <p>CaO₂ = <strong>${fmt(ca,3)}</strong> · CcvO₂ = <strong>${fmt(cv,3)}</strong> mL/dL</p>
+    <div class="worked-result">${extraction!==null?`EO₂,cv = 100 × ${fmt(delta,3)} / ${fmt(ca,3)} = <strong>${fmt(extraction,1)}%</strong>`:'Dados insuficientes para estimar extração central.'}</div>
+    ${satApprox!==null?`<p>Aproximação apenas com saturações: 100 × (${fmt(sa,1)} − ${fmt(sv,1)}) / ${fmt(sa,1)} = <strong>${fmt(satApprox,1)}%</strong>${extraction!==null?`; diferença ≈ ${fmt(Math.abs(extraction-satApprox),1)} ponto(s) percentual(is) da equação completa`:''}.</p>`:'<p>A aproximação saturacional não é exibida porque as hemoglobinas informadas são diferentes ou faltam saturações válidas.</p>'}
+    <p><strong>Hb venosa:</strong> ${esc(source)}.</p>
+   </div><p>A aproximação saturacional pressupõe Hb semelhante entre amostras e contribuição pequena de O₂ dissolvido; é especialmente sensível à hiperóxia, anemia acentuada e dis-hemoglobinemias.</p>`;
+ }
+ if(tab==='limites'){
+  const special=kind==='cvo2'?'<li><strong>Hb arterial como substituta:</strong> quando não existe Hb venosa, a plataforma usa a arterial como hipótese. Diluição de coleta, infusões e momentos diferentes podem invalidá-la.</li>':
+   kind==='aav'?'<li><strong>Amostras pareadas:</strong> mudanças de FiO₂, Hb, hemodinâmica ou tempo de coleta entre as amostras comprometem o significado fisiológico da diferença de conteúdos.</li>':
+   '<li><strong>Razão, não VO₂:</strong> a extração central não equivale necessariamente a VO₂/DO₂ sistêmicos. Uma ScvO₂ aumentada pode refletir menor demanda, mistura venosa diferente ou extração alterada, sem provar hipóxia celular.</li>';
+  return `<h3>Antes de interpretar ${heading.toLowerCase()}</h3><ul class="science-list">
+   <li><strong>Venosa central ≠ venosa mista:</strong> nem a saturação nem a diferença de conteúdos podem ser usadas como substitutas numéricas confiáveis de amostras da artéria pulmonar.</li>
+   <li><strong>Posição do CVC:</strong> VCS, junção cavoatrial e átrio direito podem receber misturas diferentes de sangue regional. É especialmente relevante quando há alterações do fluxo esplâncnico.</li>
+   <li><strong>Dados realmente medidos:</strong> saturações derivadas de curva-padrão do gasômetro podem diferir da co-oximetria. SpO₂ não mede ScvO₂ nem substitui Hb ou co-oximetria diante de dis-hemoglobinas.</li>
+   ${special}
+   <li><strong>Hiperóxia e anemia:</strong> a parcela dissolvida torna-se proporcionalmente mais relevante; não descarte o termo 0,0031 × PO₂ sem considerar as condições.</li>
+   <li><strong>Integração:</strong> ΔPCO₂, lactato, Hb, ventilação e evolução temporal dão contexto, mas não demonstram isoladamente falha microvascular, débito baixo ou metabolismo anaeróbico.</li>
+   <li><strong>Sem decisões automáticas:</strong> valores altos ou baixos deste índice não definem diagnóstico, volemia, necessidade de transfusão ou intervenção.</li>
+   </ul><div class="concept-note">Na metanálise de Li et al., os limites de concordância de ScvO₂ versus SvO₂ foram aproximadamente −12,15% a +11,17% <strong>em dez estudos com 524 pacientes analisados nessa comparação</strong>. Essa faixa não é regra de conversão para um paciente individual.</div>`;
+ }
+ return `<h3>Fontes consultadas para esta ficha</h3><ol class="science-list">
+  <li><em>Miller's Anesthesia</em>. Fisiologia respiratória, fisiologia cardíaca e monitorização cardiovascular (capítulos selecionados do projeto; edição e páginas específicas a confirmar).</li>
+  <li><em>Barash — Clinical Anesthesia</em>, 9ª ed. Fisiologia respiratória e técnicas de monitorização, capítulos 15 e 26 (paginação não verificada).</li>
+  <li>Janotka M, Ostadal P. <em>Biochemical markers for clinical monitoring of tissue perfusion.</em> Mol Cell Biochem. 2021;476:1313–1326. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7921020/" target="_blank" rel="noopener noreferrer">Texto integral</a>.</li>
+  <li>Li L, He LX, Yao YT. <em>Correlation between central venous oxygen saturation and mixed venous oxygen saturation in surgical patients: A systematic review and meta-analysis.</em> 2026;16:100076. DOI: 10.1016/j.aicoj.2026.100076. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC13195361/" target="_blank" rel="noopener noreferrer">Texto integral</a>.</li>
+ </ol><p class="subtle">Revisão crítica do relatório NotebookLM da Investigação 004. As equações de conteúdos adotam coeficientes convencionais; as diferenças entre ScvO₂ e SvO₂ não autorizam conversões fixas. Conteúdo educacional, não ferramenta validada para decisões clínicas.</p>`;
+}
+
 function renderScienceTab(tab){
  const bar=document.getElementById('pfTabBar');
  if(!bar)return;
@@ -470,7 +544,7 @@ function renderScienceTab(tab){
   button.setAttribute('aria-selected',String(active));
  });
  const kind=bar.dataset.scienceKind;
- document.getElementById('pfTabContent').innerHTML=kind==='dco2'?dco2Panel(tab):kind==='hh'?hhPanel(tab):kind==='stewart'?stewartPanel(tab):kind==='compensation'?compensationPanel(tab):kind==='cao2'?cao2Panel(tab):kind==='dph'||kind==='phest'?dphPanel(tab):pfPanel(tab);
+ document.getElementById('pfTabContent').innerHTML=kind==='dco2'?dco2Panel(tab):kind==='hh'?hhPanel(tab):kind==='stewart'?stewartPanel(tab):kind==='compensation'?compensationPanel(tab):kind==='cao2'?cao2Panel(tab):['cvo2','aav','eo2'].includes(kind)?oxygenVenousPanel(tab,kind):kind==='dph'||kind==='phest'?dphPanel(tab):pfPanel(tab);
 }
 function switchCase(id){activeId=id;recordId=activeCase()?.records[0]?.id||null;renderLayout();}
 function update(){save();renderResults();}

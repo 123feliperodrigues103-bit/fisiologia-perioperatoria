@@ -1,4 +1,4 @@
-# Fisiologia Perioperatória — v0.5.3
+# Fisiologia Perioperatória — v0.5.4
 
 Plataforma educacional estática para casos fictícios/desidentificados, com registros seriados, gráficos, fichas científicas e backup em JSON.
 
@@ -77,3 +77,21 @@ Abra um caso, informe Hb=15, SaO₂=98%, PaO₂=100 mmHg e clique na ficha de Ca
 ### Teste dirigido
 
 Após criar ou carregar um caso, deixe o pH arterial vazio e informe pH venoso central de 7,30. Deve aparecer **pH arterial ≈ (estimativa) = 7,34**. Abra a ficha para ver a faixa **7,33–7,35**. Depois informe pH arterial 7,36: o cartão estimado deve desaparecer e dar lugar a **ΔpH medido = 0,06**. Não publique antes de conferir essas condições no Chrome.
+
+## v0.5.4 — Três fichas da Investigação Científica 004
+
+- CcvO₂, C(a−cv)O₂ e extração central estimada agora dispõem, individualmente, de quatro abas: Entender, Fórmula, Limitações, Referências.
+- Cálculos **dinâmicos** com o registro ativo; CcvO₂ discrimina o O₂ ligado à Hb, dissolvido e a origem da Hb (venosa medida ou arterial usada como hipótese).
+- A diferença de conteúdos mostra o cálculo completo; a extração mostra o cálculo completo e, apenas se comparáveis as concentrações de Hb, a aproximação por saturações.
+- Conteúdo venoso central NÃO é conteúdo venoso misto, nem permite obter VO₂ sistêmico exato por Fick. Não há classificação diagnóstica automática.
+- Revisão científica: não concluir shunt ou hipoxia citopática por ScvO₂ alta + lactato alto; não converter ScvO₂ para SvO₂ com correção fixa; dados de concordância da metanálise de Li et al. advêm de subconjunto (10 estudos, n=524).
+- Mantém **oito entradas ventilatórias**, nenhuma nova variável de entrada, nenhuma mudança nas fórmulas numéricas já existentes, `localStorage` e formato JSON v0.4.
+- Na base de conhecimento, a nova ficha exige preferência por co-oximetria quando disponível, atenção à coleta simultânea, Hb venosa medida versus Hb arterial estimada, concentração versus saturação e papel da parcela dissolvida.
+
+### Teste local recomendado
+
+Carregue ou crie um caso. Entre com Hb 10 g/dL, SaO₂ 98%, PaO₂ 100 mmHg, ScvO₂ 70%, PcvO₂ 40 mmHg. Sem Hb venosa adicional: CaO₂=13,442 mL/dL, CcvO₂=9,504 mL/dL, diferença=3,938 mL/dL, extração central estimada≈29,3%. Clique em cada um dos três cartões e abra as quatro abas; na ficha de CcvO₂ confirme aviso de Hb arterial como aproximação. Depois informe Hb venosa diferente e confirme que a aproximação por saturações deixa de ser exibida. Não publique antes de testar no navegador.
+
+### Referências
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC7921020/
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC13195361/
