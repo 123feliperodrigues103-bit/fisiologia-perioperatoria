@@ -1,4 +1,4 @@
-# Fisiologia Perioperatória — v0.5.2
+# Fisiologia Perioperatória — v0.5.3
 
 Plataforma educacional estática para casos fictícios/desidentificados, com registros seriados, gráficos, fichas científicas e backup em JSON.
 
@@ -7,7 +7,7 @@ Plataforma educacional estática para casos fictícios/desidentificados, com reg
 - Ventilação reduzida aos campos usuais do carrinho: VC expirado, FR, VM, pausa inspiratória, I:E, Pplat, PEEP e Ppico. A FiO₂ permanece na seção de gasometria arterial.
 - Módulo de equilíbrio acidobásico com bicarbonato calculado por Henderson–Hasselbalch (arterial e venoso central), H⁺, SID simplificado, SID aparente, SID efetiva e SIG.
 - Detalhes de eletrólitos e condições avançadas recolhíveis; apenas resultados que podem ser calculados aparecem.
-- ΔpH preservado como resultado descritivo, sem ficha extensa.
+- ΔpH medido e estimativa de pH arterial pela amostra venosa central têm ficha científica com quatro abas.
 - Fichas científicas para Henderson–Hasselbalch e Stewart, além das existentes para P/F e ΔPCO₂.
 
 ## Requisitos científicos e limites
@@ -18,7 +18,7 @@ Plataforma educacional estática para casos fictícios/desidentificados, com reg
 - SIG = SIDa−SIDe. É estimativa, não identificação de uma substância.
 - Para driving pressure e complacência com um único campo PEEP, assume-se que a PEEP informada representa adequadamente a PEEP total e que Pplat foi medida corretamente em paciente passivo. A interface NÃO verifica essas premissas; os resultados são rotulados como aproximações.
 - A entrada de pausa inspiratória (%) é apenas registro; não certifica pausa válida ou paciente passivo.
-- Os dados venosos NÃO são automaticamente corrigidos por +0,03 para inferir valores arteriais.
+- Apenas uma estimativa separada e claramente rotulada do pH arterial pode ser exibida a partir do pH venoso central; ela NÃO alimenta outros cálculos arteriais.
 
 ## Compatibilidade de dados
 
@@ -63,3 +63,17 @@ Não validado para diagnóstico ou orientação terapêutica; uso educacional.
 ### Teste dirigido
 
 Abra um caso, informe Hb=15, SaO₂=98%, PaO₂=100 mmHg e clique na ficha de CaO₂: deve mostrar 19,698 mL/dL ligado à Hb, 0,310 dissolvido e CaO₂=20,01 mL/dL. Modifique Hb para 7: CaO₂=9,50 mL/dL. Confira as 4 abas.
+
+## Ajustes v0.5.3 — Ficha ΔpH e estimativa venosa central → arterial
+
+- ΔpH arterial menos venoso central passa a ter ficha científica de quatro abas.
+- Se houver **apenas pH venoso central** em faixa não extrema (7,20–7,60), surge um cartão claramente rotulado de **pH arterial aproximado (estimativa)**, com ponto central pHcv+0,04; na ficha aparece a faixa de diferenças típicas populacionais pHcv+0,03 a +0,05. **Não** é intervalo de confiança/predição individual nem medida arterial.
+- Se o pH arterial estiver presente, a estimativa não é exibida; havendo também pH venoso, aparece o ΔpH real das amostras.
+- A aproximação não é usada em nenhum cálculo arterial, gasométrico, acidobásico, Stewart, de compensação ou de oxigenação.
+- A interface não detecta choque, instabilidade hemodinâmica nem amostra venosa periférica: a fórmula pode ser inadequada mesmo se o pH estiver entre 7,20 e 7,60.
+- As diferenças típicas e limitações foram extraídas do UpToDate, **Venous blood gases and alternatives to arterial carbon dioxide measurement in adults** (Arthur C Theodore, atualização 12/06/2026), tabela 2 e texto correlato, fornecido pelo usuário.
+- Os casos salvos, formulário, JSON e chave localStorage permanecem iguais aos da v0.5.2.
+
+### Teste dirigido
+
+Após criar ou carregar um caso, deixe o pH arterial vazio e informe pH venoso central de 7,30. Deve aparecer **pH arterial ≈ (estimativa) = 7,34**. Abra a ficha para ver a faixa **7,33–7,35**. Depois informe pH arterial 7,36: o cartão estimado deve desaparecer e dar lugar a **ΔpH medido = 0,06**. Não publique antes de conferir essas condições no Chrome.

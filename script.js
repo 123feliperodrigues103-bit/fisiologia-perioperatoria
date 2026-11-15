@@ -31,7 +31,8 @@ function ratioToNumber(text){
 const definitions={
  pf:['Relação PaO₂/FiO₂','Índice de oxigenação arterial ajustado à FiO₂.','P/F = PaO₂ / (FiO₂ / 100)','A P/F depende de condições ventilatórias, pressão barométrica e circulação; não determina shunt ou SDRA isoladamente.'],
  dco2:['Gradiente venoso central–arterial de PCO₂','Diferença de pressões parciais de CO₂, não de conteúdos.','ΔPCO₂ = PcvCO₂ − PaCO₂','Não mede débito cardíaco ou hipoperfusão diretamente.'],
- dph:['Diferença arterial–venosa de pH','Diferença entre pH arterial e venoso central.','ΔpH = pH arterial − pH venoso','Escala logarítmica, não equivale à diferença de concentração de H⁺.'],
+ dph:['Diferença arterial–venosa de pH','ΔpH real de amostras arterial e venosa central pareadas.','ΔpH = pHa − pHcv','Valor descritivo. pH é logarítmico; ΔpH não diagnostica choque e não deve ser confundido com estimativa arterial a partir de amostra venosa.'],
+ phest:['pH arterial APROXIMADO (somente venosa central)','Estimativa populacional de pH arterial em situação em que não foi informado pH arterial.','pHa estimado ≈ pHcv + (0,03 a 0,05)','Faixa heurística, não intervalo de previsão de 95%; pode falhar especialmente em choque, instabilidade ou distúrbios acidobásicos extremos. Nunca é usada para outros cálculos.'],
  hco3a:['HCO₃⁻ arterial — Henderson–Hasselbalch','Bicarbonato calculado a partir de pH arterial e PaCO₂.','[HCO₃⁻] = 0,0301 × PaCO₂ × 10^(pH−6,1)','É matematicamente derivado dos dados de gasometria: não é uma terceira medida independente.'],
  hco3v:['HCO₃⁻ venoso central — Henderson–Hasselbalch','Bicarbonato calculado a partir de pH venoso central e PcvCO₂.','[HCO₃⁻] = 0,0301 × PcvCO₂ × 10^(pHvenoso−6,1)','Não equivale automaticamente ao bicarbonato arterial.'],
  hplusA:['Atividade/concentração aproximada de H⁺ arterial','Conversão da escala logarítmica de pH para concentração molar aproximada.','[H⁺] ≈ 10^(9−pH) nmol/L','pH é o logaritmo da atividade de H⁺; conversão é uma aproximação de concentração.'],
@@ -68,7 +69,7 @@ const definitions={
 const metricGroups=[
  ['EQUILÍBRIO ACIDOBÁSICO',[['hco3a','HCO₃⁻ arterial (H–H)','mmol/L',1],['hco3v','HCO₃⁻ venoso (H–H)','mmol/L',1],['hplusA','H⁺ arterial','nmol/L',1],['hplusV','H⁺ venoso','nmol/L',1],['sidnacl','Na⁺ − Cl⁻ (SID aprox.)','mmol/L',1],['sids','SID simplificado','mEq/L',1],['sida','SID aparente','mEq/L',1],['side','SID efetivo','mEq/L',1],['sig','SIG','mEq/L',1],['ag','Ânion gap (sem K⁺)','mmol/L',1],['agcorr','AG corrigido (albumina)','mmol/L',1]]],
  ['COMPENSAÇÃO ACIDOBÁSICA',[['pco2exp','PaCO₂ esperada','mmHg',1],['hco3exp','HCO₃⁻ esperado','mmol/L',1]]],
- ['GASOMETRIA E OXIGENAÇÃO',[['pf','Relação P/F','mmHg',1],['dco2','ΔPCO₂','mmHg',1],['dph','ΔpH','',2],['cao2','CaO₂','mL/dL',2],['cvo2','CcvO₂ estimado','mL/dL',2],['aav','CaO₂ − CcvO₂','mL/dL',2],['eo2','Extração central','%',1],['pao2','PAO₂ estimada','mmHg',1],['aagrad','Gradiente A–a','mmHg',1]]],
+ ['GASOMETRIA E OXIGENAÇÃO',[['pf','Relação P/F','mmHg',1],['dco2','ΔPCO₂','mmHg',1],['dph','ΔpH medido','',2],['phest','pH arterial ≈ (estimativa)','aproximado',2],['cao2','CaO₂','mL/dL',2],['cvo2','CcvO₂ estimado','mL/dL',2],['aav','CaO₂ − CcvO₂','mL/dL',2],['eo2','Extração central','%',1],['pao2','PAO₂ estimada','mmHg',1],['aagrad','Gradiente A–a','mmHg',1]]],
  ['PACIENTE E VENTILAÇÃO',[['pbw','PBW','kg',1],['bsa','Superfície corporal','m²',2],['vtpbw','VC/PBW','mL/kg',1],['ve','VM calculado','L/min',2],['ie','Relação I:E','',2]]],
  ['MECÂNICA E CIRCULAÇÃO',[['dp','Driving pressure (aprox.)','cmH₂O',1],['cstat','Complacência estática (aprox.)','mL/cmH₂O',1],['cdyn','Complacência dinâmica (aprox.)','mL/cmH₂O',1],['do2','DO₂','mL/min',1],['doi','DO₂ indexado','mL/min/m²',1]]]
 ];
@@ -152,6 +153,10 @@ function compute(d,p){
  Object.assign(out,{
   hco3a,hco3v,hplusA:pHa===null?null:Math.pow(10,9-pHa),hplusV:pHv===null?null:Math.pow(10,9-pHv),sidnacl:sidNaCl,sids:simpleSid,sida,side,sig:maybe(sida,side)?sida-side:null,ag:anionGap,agcorr:correctedAG,pco2exp:comp?.kind==='pco2'&&Number.isFinite(comp.middle)?comp.middle:null,hco3exp:comp?.kind==='hco3'&&Number.isFinite(comp.middle)?comp.middle:null,
   pf:maybe(fio,pa)?pa/(fio/100):null,dco2:maybe(pc,pv)?pv-pc:null,dph:maybe(pHa,pHv)?pHa-pHv:null,
+  // Estimativa populacional em paciente presumidamente estável: sem amostra arterial,
+  // e apenas para pH venoso central fora dos extremos de distúrbio acidobásico.
+  // NÃO utilizar esta variável como entrada em outras equações.
+  phest:pHa===null&&pHv!==null&&pHv>=7.20&&pHv<=7.60?pHv+0.04:null,
   cao2:caO2,cvo2:cvO2,aav:avO2,eo2:maybe(avO2,caO2)&&caO2>0?100*avO2/caO2:null,
   pbw,bsa,vtpbw:maybe(vte,pbw)&&pbw>0?vte/pbw:null,ve:maybe(vte,rr)?vte*rr/1000:null,ie,
   dp:driving,cstat:maybe(vte,driving)&&driving>0?vte/driving:null,
@@ -181,7 +186,7 @@ function renderResults(){const c=activeCase(),r=currentRecord();if(!c||!r)return
  const cards=metricGroups.map(([category,items])=>{
   const available=items.filter(([key])=>Number.isFinite(results[key]));
   if(!available.length)return '';
-  return `<div class="metric-group-label">${category}</div>`+available.map(([key,label,unit,places])=>`<button class="metric" data-info="${key}"><span class="label">${label}</span><span class="number">${key==='ie'?fmtIE(results[key]):fmt(results[key],places)}</span><span class="unit">${unit}</span><span class="more">Entender fórmula e limites ↗</span></button>`).join('');
+  return `<div class="metric-group-label">${category}</div>`+available.map(([key,label,unit,places])=>`<button class="metric" data-info="${key}"><span class="label">${label}</span><span class="number">${key==='ie'?fmtIE(results[key]):fmt(results[key],places)}</span><span class="unit">${unit}</span><span class="more">${key==='phest'?'Estimativa populacional · inadequada em choque ↗':'Entender fórmula e limites ↗'}</span></button>`).join('');
  }).join('');
  document.getElementById('metricCards').innerHTML=cards||'<p class="hint">Preencha os dados disponíveis. Apenas índices com requisitos satisfeitos aparecerão aqui.</p>';
  renderCompensation(r.values,results);
@@ -212,7 +217,7 @@ function renderEvolution(){const c=activeCase();if(!c)return;
  const line=points.map(p=>`${x(p.i)},${y(p.v)}`).join(' ');
  canvas.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolução de ${esc(allMetrics.find(m=>m[0]===chosen)?.[1]||chosen)}"><g fill="none" stroke="#dfe7ee">${[0,1,2,3,4].map(i=>`<line x1="${left}" y1="${top+(h-top-bottom)*i/4}" x2="${w-right}" y2="${top+(h-top-bottom)*i/4}"/>`).join('')}</g><g font-size="11" fill="#718799">${[0,1,2,3,4].map(i=>`<text x="${left-8}" y="${top+(h-top-bottom)*i/4+4}" text-anchor="end">${fmt(max-(max-min)*i/4,1)}</text>`).join('')}${cols.map((r,i)=>`<text x="${x(i)}" y="${h-15}" text-anchor="middle">R${i+1}</text>`).join('')}</g><polyline points="${line}" fill="none" stroke="#287da6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${points.map(p=>`<circle cx="${x(p.i)}" cy="${y(p.v)}" r="4.5" fill="#287da6"><title>Registro ${p.i+1}: ${fmt(p.v,2)}</title></circle>`).join('')}</svg>`;
 }
-function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='pf'||key==='dco2'||key==='cao2'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig','pco2exp','hco3exp'].includes(key)){
+function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='pf'||key==='dco2'||key==='cao2'||key==='dph'||key==='phest'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig','pco2exp','hco3exp'].includes(key)){
  const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.dataset.scienceKind=['hco3a','hco3v','hplusA','hplusV'].includes(key)?'hh':(['sids','sida','side','sig'].includes(key)?'stewart':(['pco2exp','hco3exp'].includes(key)?'compensation':key));bar.setAttribute('role','tablist');for(const t of pfTabs){const button=document.createElement('button');button.type='button';button.textContent=t.label;button.dataset.pfTab=t.id;button.setAttribute('role','tab');bar.appendChild(button);}const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';node.append(bar,content);renderScienceTab('entender');
  }else{const p=document.createElement('p');p.textContent=description;node.appendChild(p);const eq=document.createElement('div');eq.className='equation';eq.textContent=equation;node.appendChild(eq);const r=currentRecord(),c=activeCase(),result=r&&c?compute(r.values,c.profile)[key]:null;const show=document.createElement('p');show.textContent=`Resultado do registro: ${key==='ie'&&Number.isFinite(result)?fmtIE(result):fmt(result,2)} ${allMetrics.find(m=>m[0]===key)?.[2]||''}`;node.appendChild(show);const note=document.createElement('p');note.textContent=limit;node.appendChild(note);}document.getElementById('infoDialog').showModal();}
 
@@ -408,6 +413,54 @@ function cao2Panel(tab){
   <p class="subtle">Texto didático original. Não reproduz passagens extensas dos livros. Não atribuímos páginas ou figuras não conferidas. A ficha não foi validada para orientar decisões assistenciais.</p>`;
 }
 
+function dphPanel(tab){
+ const d=currentRecord()?.values||{};
+ const pHa=val(d,'aph',6,8),pHcv=val(d,'vph',6,8);
+ const paired=maybe(pHa,pHcv),onlyVenous=pHa===null&&pHcv!==null;
+ const eligible=onlyVenous&&pHcv>=7.20&&pHcv<=7.60;
+ const actual=paired?pHa-pHcv:null;
+ const hA=pHa===null?null:Math.pow(10,9-pHa),hV=pHcv===null?null:Math.pow(10,9-pHcv);
+ if(tab==='entender')return `
+  <h3>pH arterial e venoso não são idênticos</h3>
+  <p>O sangue venoso central reflete a adição de CO₂ pela atividade metabólica e a composição do sangue que retorna de diferentes territórios. O sangue arterial e o venoso central têm, normalmente, pH próximos, mas distintos. A diferença não é uma constante fisiológica.</p>
+  <div class="concept-note"><strong>Dois resultados diferentes:</strong> com as duas gasometrias, calculamos o <strong>ΔpH medido</strong>. Quando há apenas pH venoso central, podemos oferecer uma <strong>aproximação populacional do pH arterial</strong>, que não equivale a medir o sangue arterial.</div>
+  <p>Segundo o UpToDate (2026), em condições habituais o pH venoso <strong>central</strong> costuma ser aproximadamente 0,03–0,05 unidade inferior ao arterial. Esse intervalo descreve diferenças típicas, e não a incerteza total aplicável a cada indivíduo.</p>
+  <p>Por isso, a gasometria venosa ajuda na discussão acidobásica, mas não substitui a arterial para avaliar oxigenação nem para obter PaCO₂ precisa em pacientes instáveis.</p>`;
+ if(tab==='formula')return `
+  <h3>1. Se as duas amostras estão disponíveis</h3>
+  <div class="equation equation-large">ΔpH = pH arterial medido − pH venoso central medido</div>
+  <p>O pH é logarítmico: uma diferença de 0,03 unidade não equivale a uma diferença de 0,03 nmol/L de H⁺. Para discutir a concentração aparente de H⁺: [H⁺] ≈ 10^(9−pH), em nmol/L.</p>
+  <div class="worked-example"><span class="eyebrow">GASOMETRIA PAREADA · REGISTRO ATUAL</span>
+   ${paired?`<p>pHa ${fmt(pHa,2)} − pHcv ${fmt(pHcv,2)} = <strong>ΔpH ${fmt(actual,2)}</strong></p><p>[H⁺] arterial ≈ ${fmt(hA,1)} nmol/L · [H⁺] venoso central ≈ ${fmt(hV,1)} nmol/L</p>`:'<p>Não há duas medidas de pH válidas neste registro. O ΔpH medido permanece indisponível.</p>'}
+  </div>
+  <h3>2. Se só há gasometria venosa central</h3>
+  <div class="equation">pH arterial aproximado ≈ pHcv + 0,03 a 0,05</div>
+  <div class="worked-example"><span class="eyebrow">APROXIMAÇÃO DIDÁTICA · REGISTRO ATUAL</span>
+   ${eligible?`<p>pHcv = ${fmt(pHcv,2)} → pH arterial aproximado: <strong>${fmt(pHcv+0.03,2)} a ${fmt(pHcv+0.05,2)}</strong></p><p>O cartão de resultado mostra o ponto central <strong>${fmt(pHcv+0.04,2)}</strong>, identificado como <strong>estimativa</strong>; a faixa inteira não constitui intervalo de confiança ou previsão individual.</p>`:onlyVenous?'<p>O pH venoso está em faixa extrema (&lt;7,20 ou &gt;7,60); não mostramos conversão numérica por segurança didática.</p>':'<p>Para demonstrar essa aproximação, deixe o pH arterial vazio e informe apenas o pH venoso central.</p>'}
+  </div>
+  <p><strong>Nota:</strong> nenhuma estimativa de pH arterial é utilizada como entrada nos cálculos de HCO₃⁻ arterial, compensação, SIDe/SIG, P/F ou nos demais índices.</p>`;
+ if(tab==='limites')return `
+  <h3>Limitações da extrapolação venosa → arterial</h3>
+  <ul class="science-list">
+   <li><strong>Variabilidade individual:</strong> +0,03 a +0,05 é uma diferença habitual entre médias/populações, não um intervalo de concordância de 95% para pacientes individuais. Não autoriza arredondar e tratar como medida.</li>
+   <li><strong>Choque e baixo fluxo:</strong> as diferenças arteriovenosas de pH e PCO₂ podem se ampliar de maneira imprevisível na insuficiência circulatória, mesmo que o pH venoso isolado esteja entre 7,20 e 7,60. A interface não detecta choque.</li>
+   <li><strong>Acidobase extrema:</strong> o UpToDate recomenda cautela com uso substitutivo de gasometria venosa em pH &lt;7,20 ou &gt;7,60. A calculadora oculta a estimativa numérica nessa faixa, mas isso não valida os demais casos.</li>
+   <li><strong>Local da amostra:</strong> a referência de +0,03 a +0,05 é para sangue venoso central; amostras periféricas têm outras diferenças e não devem ser colocadas neste campo sem ressalva.</li>
+   <li><strong>Oximetria:</strong> não existe conversão confiável de PcvO₂/ScvO₂ para PaO₂/SaO₂. Uma gasometria venosa não fornece relação P/F arterial nem gradiente A–a.</li>
+   <li><strong>Henderson–Hasselbalch:</strong> o bicarbonato venoso pode ser calculado usando pHcv e PcvCO₂ reais, sem inventar pH arterial. O mesmo cuidado vale para PaCO₂ e para as compensações acidobásicas.</li>
+  </ul>
+  <div class="concept-note">A faixa estimada é apenas recurso didático. Se a resposta exigir exatidão arterial, use uma amostra arterial real e considere o estado circulatório.</div>`;
+ return `
+  <h3>Fontes</h3>
+  <ol class="science-list">
+   <li>Theodore AC. <em>Venous blood gases and alternatives to arterial carbon dioxide measurement in adults</em>. UpToDate. Última atualização: 12/06/2026. Seções "Interpretation: Venous to arterial conversion estimates", tabela 2 (página 13 no documento fornecido) e "Clinical uses". Fonte fornecida pelo usuário e utilizada em síntese, sem reproduzir integralmente o texto protegido.</li>
+   <li>Middleton P, Kelly AM, Brown J, Robertson M. <em>Agreement between arterial and central venous values for pH, bicarbonate, base excess, and lactate</em>. Emerg Med J. 2006;23:622–624.</li>
+   <li>Walkey AJ, Farber HW, O'Donnell C, et al. <em>The accuracy of the central venous blood gas for acid-base monitoring</em>. J Intensive Care Med. 2010;25:104–110.</li>
+   <li>Adrogué HJ, Rashad MN, Gorin AB, et al. <em>Assessing acid-base status in circulatory failure. Differences between arterial and central venous blood</em>. N Engl J Med. 1989;320:1312–1316.</li>
+  </ol>
+  <p>As referências de artigos são as citadas no UpToDate enviado. A ficha é educacional e os detalhes originais devem ser consultados antes de inferir aplicabilidade a uma população específica.</p>`;
+}
+
 function renderScienceTab(tab){
  const bar=document.getElementById('pfTabBar');
  if(!bar)return;
@@ -417,7 +470,7 @@ function renderScienceTab(tab){
   button.setAttribute('aria-selected',String(active));
  });
  const kind=bar.dataset.scienceKind;
- document.getElementById('pfTabContent').innerHTML=kind==='dco2'?dco2Panel(tab):kind==='hh'?hhPanel(tab):kind==='stewart'?stewartPanel(tab):kind==='compensation'?compensationPanel(tab):kind==='cao2'?cao2Panel(tab):pfPanel(tab);
+ document.getElementById('pfTabContent').innerHTML=kind==='dco2'?dco2Panel(tab):kind==='hh'?hhPanel(tab):kind==='stewart'?stewartPanel(tab):kind==='compensation'?compensationPanel(tab):kind==='cao2'?cao2Panel(tab):kind==='dph'||kind==='phest'?dphPanel(tab):pfPanel(tab);
 }
 function switchCase(id){activeId=id;recordId=activeCase()?.records[0]?.id||null;renderLayout();}
 function update(){save();renderResults();}
