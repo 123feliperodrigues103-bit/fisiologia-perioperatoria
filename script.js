@@ -29,6 +29,7 @@ function ratioToNumber(text){
  return i>0&&e>0&&i<=20&&e/i<=30?e/i:null;
 }
 const definitions={
+ integracao:['Interpretação integrada da gasometria pareada','Leitura conjunta de conteúdo venoso central, ΔPCO₂, lactato e razão de pressão/conteúdo.','ΔPCO₂ / C(a−cv)O₂ = (PcvCO₂−PaCO₂)/(CaO₂−CcvO₂)','Índice exploratório: não equivale ao quociente respiratório, não mede metabolismo anaeróbico e não é uma meta validada de ressuscitação.'],
  pf:['Relação PaO₂/FiO₂','Índice de oxigenação arterial ajustado à FiO₂.','P/F = PaO₂ / (FiO₂ / 100)','A P/F depende de condições ventilatórias, pressão barométrica e circulação; não determina shunt ou SDRA isoladamente.'],
  dco2:['Gradiente venoso central–arterial de PCO₂','Diferença de pressões parciais de CO₂, não de conteúdos.','ΔPCO₂ = PcvCO₂ − PaCO₂','Não mede débito cardíaco ou hipoperfusão diretamente.'],
  dph:['Diferença arterial–venosa de pH','ΔpH real de amostras arterial e venosa central pareadas.','ΔpH = pHa − pHcv','Valor descritivo. pH é logarítmico; ΔpH não diagnostica choque e não deve ser confundido com estimativa arterial a partir de amostra venosa.'],
@@ -217,7 +218,7 @@ function renderEvolution(){const c=activeCase();if(!c)return;
  const line=points.map(p=>`${x(p.i)},${y(p.v)}`).join(' ');
  canvas.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolução de ${esc(allMetrics.find(m=>m[0]===chosen)?.[1]||chosen)}"><g fill="none" stroke="#dfe7ee">${[0,1,2,3,4].map(i=>`<line x1="${left}" y1="${top+(h-top-bottom)*i/4}" x2="${w-right}" y2="${top+(h-top-bottom)*i/4}"/>`).join('')}</g><g font-size="11" fill="#718799">${[0,1,2,3,4].map(i=>`<text x="${left-8}" y="${top+(h-top-bottom)*i/4+4}" text-anchor="end">${fmt(max-(max-min)*i/4,1)}</text>`).join('')}${cols.map((r,i)=>`<text x="${x(i)}" y="${h-15}" text-anchor="middle">R${i+1}</text>`).join('')}</g><polyline points="${line}" fill="none" stroke="#287da6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${points.map(p=>`<circle cx="${x(p.i)}" cy="${y(p.v)}" r="4.5" fill="#287da6"><title>Registro ${p.i+1}: ${fmt(p.v,2)}</title></circle>`).join('')}</svg>`;
 }
-function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='pf'||key==='dco2'||key==='cao2'||['cvo2','aav','eo2'].includes(key)||key==='dph'||key==='phest'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig','pco2exp','hco3exp'].includes(key)){
+function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='integracao'||key==='pf'||key==='dco2'||key==='cao2'||['cvo2','aav','eo2'].includes(key)||key==='dph'||key==='phest'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig','pco2exp','hco3exp'].includes(key)){
  const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.dataset.scienceKind=['hco3a','hco3v','hplusA','hplusV'].includes(key)?'hh':(['sids','sida','side','sig'].includes(key)?'stewart':(['pco2exp','hco3exp'].includes(key)?'compensation':key));bar.setAttribute('role','tablist');for(const t of pfTabs){const button=document.createElement('button');button.type='button';button.textContent=t.label;button.dataset.pfTab=t.id;button.setAttribute('role','tab');bar.appendChild(button);}const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';node.append(bar,content);renderScienceTab('entender');
  }else{const p=document.createElement('p');p.textContent=description;node.appendChild(p);const eq=document.createElement('div');eq.className='equation';eq.textContent=equation;node.appendChild(eq);const r=currentRecord(),c=activeCase(),result=r&&c?compute(r.values,c.profile)[key]:null;const show=document.createElement('p');show.textContent=`Resultado do registro: ${key==='ie'&&Number.isFinite(result)?fmtIE(result):fmt(result,2)} ${allMetrics.find(m=>m[0]===key)?.[2]||''}`;node.appendChild(show);const note=document.createElement('p');note.textContent=limit;node.appendChild(note);}document.getElementById('infoDialog').showModal();}
 
@@ -535,6 +536,61 @@ function oxygenVenousPanel(tab,kind){
  </ol><p class="subtle">Revisão crítica do relatório NotebookLM da Investigação 004. As equações de conteúdos adotam coeficientes convencionais; as diferenças entre ScvO₂ e SvO₂ não autorizam conversões fixas. Conteúdo educacional, não ferramenta validada para decisões clínicas.</p>`;
 }
 
+// Investigação 005 — interpretação conjunta, não uma regra diagnóstica nem nova métrica persistida.
+function integrationPanel(tab){
+ const r=currentRecord(),d=r?.values||{},c=activeCase();
+ const m=c&&r?compute(d,c.profile):{};
+ const gap=Number.isFinite(m.dco2)?m.dco2:null;
+ const diff=Number.isFinite(m.aav)?m.aav:null;
+ const sv=val(d,'vso2',0,100),lact=val(d,'lactate',0,35);
+ // Denominadores pequenos amplificam erros de amostragem e arredondamento.
+ const ratio=(gap!==null&&diff!==null&&diff>0.5)?gap/diff:null;
+ const valOr=(v,places=1)=>Number.isFinite(v)?fmt(v,places):'não disponível';
+ const current=`<div class="integrated-readout" aria-label="Valores do registro ativo">
+   <div><small>ScvO₂ · saturação venosa central</small><strong>${valOr(sv,1)}${sv===null?'':'%'}</strong></div>
+   <div><small>ΔPcv−aCO₂ · pressão</small><strong>${valOr(gap,1)}${gap===null?'':' mmHg'}</strong></div>
+   <div><small>C(a−cv)O₂ · diferença de conteúdos</small><strong>${valOr(diff,2)}${diff===null?'':' mL/dL'}</strong></div>
+   <div><small>Lactato informado</small><strong>${valOr(lact,1)}${lact===null?'':' mmol/L'}</strong></div>
+  </div>`;
+ if(tab==='entender')return `<h3>Por que os indicadores podem parecer contraditórios?</h3>
+  <p>Uma <strong>ScvO₂ elevada</strong> indica que o sangue venoso central ainda contém grande proporção de Hb oxigenada. Isso pode ocorrer por redução do consumo regional, aumento da oferta relativa, heterogeneidade de fluxo ou dificuldade de extração. <strong>Não é prova de perfusão tecidual adequada.</strong></p>
+  <p>O <strong>ΔPCO₂</strong> relaciona a pressão parcial de CO₂ venosa central à arterial. Pode aumentar quando a remoção circulatória de CO₂ é insuficiente em relação à sua produção, mas também é influenciado pela relação entre conteúdo e pressão de CO₂, Hb, oxigenação e estado acidobásico.</p>
+  <div class="concept-note"><strong>Questão central:</strong> ScvO₂ de 82% com ΔPCO₂ de 10 mmHg é uma combinação fisiologicamente possível. Não comprova, por si só, baixo débito, choque, shunt microvascular ou metabolismo anaeróbico.</div>
+  ${current}<p>O <strong>lactato</strong> reflete produção e depuração; pode elevar-se com hipóxia, estimulação adrenérgica, medicamentos e alterações metabólicas ou de depuração. Um único valor não define sua causa.</p>
+  <p>Compare os registros e as condições de coleta: momento cirúrgico, circulação, Hb, ventilação, intervenções e origem da amostra. A evolução acrescenta contexto, mas não prova causalidade.</p>`;
+ if(tab==='formula')return `<h3>De onde surgiu a razão ΔPCO₂/C(a−cv)O₂?</h3>
+  <p>Em um estado estacionário, o princípio de Fick para a circulação sistêmica relaciona as taxas de troca gasosa às diferenças de <strong>conteúdo</strong> arterial e venoso <strong>misto</strong>.</p>
+  <div class="equation equation-large">RQ ≈ [Cv̄CO₂ − CaCO₂] / [CaO₂ − Cv̄O₂]</div>
+  <p>As diferenças de conteúdo usam unidades comparáveis (mL de gás/dL de sangue). A igualdade exige uma descrição adequada dos fluxos e do sangue venoso misto; uma amostra venosa central não é intercambiável com a mista.</p>
+  <p>Para tornar a fórmula mais acessível, propôs-se substituir a diferença de <em>conteúdo de CO₂</em> pela diferença de sua <em>pressão parcial</em>. Essa substituição elimina a equivalência dimensional e depende da curva de dissociação de CO₂.</p>
+  <div class="equation equation-large">Razão exploratória = (PcvCO₂ − PaCO₂) / (CaO₂ − CcvO₂)</div>
+  ${current}
+  <div class="worked-example"><span class="eyebrow">DEMONSTRAÇÃO MATEMÁTICA · REGISTRO ATUAL</span>
+   <p>Numerador: <strong>${valOr(gap,2)} mmHg</strong>; denominador: <strong>${valOr(diff,3)} mL O₂/dL</strong>.</p>
+   <div class="worked-result">${ratio!==null?`${fmt(gap,2)} ÷ ${fmt(diff,3)} = <strong>${fmt(ratio,2)} mmHg·dL/mL O₂</strong>`:gap===null||diff===null?'Informe dados arteriais e venosos suficientes para ΔPCO₂ e diferença de conteúdos de O₂.':'A diferença de conteúdos é nula, negativa ou muito pequena (≤0,5 mL/dL). A razão não é exibida, pois fica indefinida ou particularmente instável.'}</div>
+   <p class="subtle">Cálculo exclusivamente didático; não é o RQ, não classifica metabolismo anaeróbico nem desencadeia alerta.</p>
+  </div><p><strong>Análise dimensional:</strong> mmHg ÷ (mL O₂/dL) = mmHg·dL/mL O₂, ao contrário do RQ adimensional. Se o conteúdo de O₂ for expresso em mL/L, o valor numérico muda por um fator de dez.</p>
+  <p>Exemplo: ΔPCO₂ = 10 mmHg e C(a−cv)O₂ = 2,5 mL/dL produzem razão = 4,0 mmHg·dL/mL O₂. Isso não significa RQ de 4,0.</p>`;
+ if(tab==='limites')return `<h3>Por que não usar a razão como diagnóstico?</h3>
+  <ul class="science-list">
+   <li><strong>Pressão ≠ conteúdo:</strong> a curva de dissociação de CO₂ não é uma reta com inclinação constante. Efeito Haldane, concentração de Hb, saturação, pH, temperatura e bicarbonato alteram a relação.</li>
+   <li><strong>Venosa central ≠ mista:</strong> os compartimentos têm drenagens diferentes. A razão baseada em CcvO₂ não fornece RQ sistêmico por Fick.</li>
+   <li><strong>Denominador pequeno:</strong> baixa diferença de conteúdos de O₂ pode elevar muito o valor da razão sem que isso prove anaerobiose. Medidas não simultâneas e Hb de fontes distintas aumentam incerteza.</li>
+   <li><strong>Estudo prospectivo:</strong> Gutierrez et al. mediram o RQ por calorimetria indireta em 47 pacientes com choque séptico. A razão pressão/conteúdo não apresentou correlação relevante (R²=0,01). A amostra e o contexto limitam generalizações.</li>
+   <li><strong>Desfechos clínicos:</strong> em ensaio randomizado com 228 pacientes com sepse grave/choque séptico, ressuscitação guiada pela razão não melhorou o prognóstico em comparação com estratégia orientada por saturação venosa.</li>
+   <li><strong>Sem corte universal:</strong> valores acima de 1,4 foram usados em estudos observacionais, mas não definem metabolismo anaeróbico nem indicam fluidos, transfusão ou inotrópicos.</li>
+   <li><strong>Tendência não prova mecanismo:</strong> queda do ΔPCO₂ após uma intervenção pode coexistir com mudanças de fluxo, consumo e transporte de CO₂; não demonstra responsividade volêmica.</li>
+  </ul>
+  <div class="concept-note">Não concluir que ScvO₂ alta + ΔPCO₂ alto <em>confirma</em> shunting ou disfunção mitocondrial. A conclusão mais rigorosa é: dados potencialmente discordantes, que exigem integrar contexto, cronologia e outras medidas.</div>`;
+ return `<h3>Fontes e posições científicas</h3><ol class="science-list">
+  <li>Janotka M, Ostadal P. <em>Biochemical markers for clinical monitoring of tissue perfusion.</em> Mol Cell Biochem. 2021;476:1313–1326. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7921020/" target="_blank" rel="noopener noreferrer">Revisão de marcadores</a>.</li>
+  <li>Dubin A, Pozo MO, Hurtado J. <em>Central venous minus arterial carbon dioxide pressure to arterial minus central venous oxygen content ratio as an indicator of tissue oxygenation.</em> Rev Bras Ter Intensiva. 2020;32:115–122. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7206946/" target="_blank" rel="noopener noreferrer">Revisão crítica</a>.</li>
+  <li>Gutierrez FJ et al. <em>Lack of correlation between central venous minus arterial PCO₂ to arterial minus central venous O₂ content ratio and respiratory quotient in patients with septic shock.</em> Med Intensiva (Engl Ed). 2025;49:8–14 (publicação eletrônica 2024). <a href="https://pubmed.ncbi.nlm.nih.gov/38909012/" target="_blank" rel="noopener noreferrer">Estudo prospectivo</a>.</li>
+  <li>Su L et al. <em>P(v−a)CO₂/C(a−v)O₂-directed resuscitation does not improve prognosis compared with SvO₂...</em> J Crit Care. 2018;48:314–320. <a href="https://pubmed.ncbi.nlm.nih.gov/30278407/" target="_blank" rel="noopener noreferrer">Ensaio randomizado</a>.</li>
+  <li><em>Miller's Anesthesia</em> e <em>Barash — Clinical Anesthesia</em>: transporte de CO₂, efeito Haldane, princípio de Fick e monitorização hemodinâmica; edição/páginas específicas não conferidas.</li>
+ </ol><p class="subtle">Síntese original da Investigação Científica 005. Distingue proposição fisiológica, associação observacional e demonstração de benefício clínico. Não é recomendação de manejo.</p>`;
+}
+
 function renderScienceTab(tab){
  const bar=document.getElementById('pfTabBar');
  if(!bar)return;
@@ -544,7 +600,7 @@ function renderScienceTab(tab){
   button.setAttribute('aria-selected',String(active));
  });
  const kind=bar.dataset.scienceKind;
- document.getElementById('pfTabContent').innerHTML=kind==='dco2'?dco2Panel(tab):kind==='hh'?hhPanel(tab):kind==='stewart'?stewartPanel(tab):kind==='compensation'?compensationPanel(tab):kind==='cao2'?cao2Panel(tab):['cvo2','aav','eo2'].includes(kind)?oxygenVenousPanel(tab,kind):kind==='dph'||kind==='phest'?dphPanel(tab):pfPanel(tab);
+ document.getElementById('pfTabContent').innerHTML=kind==='integracao'?integrationPanel(tab):kind==='dco2'?dco2Panel(tab):kind==='hh'?hhPanel(tab):kind==='stewart'?stewartPanel(tab):kind==='compensation'?compensationPanel(tab):kind==='cao2'?cao2Panel(tab):['cvo2','aav','eo2'].includes(kind)?oxygenVenousPanel(tab,kind):kind==='dph'||kind==='phest'?dphPanel(tab):pfPanel(tab);
 }
 function switchCase(id){activeId=id;recordId=activeCase()?.records[0]?.id||null;renderLayout();}
 function update(){save();renderResults();}
@@ -561,5 +617,6 @@ document.getElementById('importFile').onchange=async e=>{const file=e.target.fil
 document.addEventListener('input',e=>{const target=e.target;const r=currentRecord(),c=activeCase();if(!r||!c)return;if(target.matches('[data-field]')){const raw=target.value.trim().replace(',','.');r.values[target.dataset.field]=target.dataset.field==='ieratio'?(raw||null):(raw===''?null:Number(raw));update();}else if(target.matches('[data-profile]')&&target.tagName!=='SELECT'){const k=target.dataset.profile;const raw=target.value.trim().replace(',','.');c.profile[k]=k==='description'?target.value:(raw===''?null:Number(raw));update();}else if(target.id==='recordNote'){r.note=target.value;save();}});
 document.addEventListener('change',e=>{if(e.target.id==='primaryDisorder'){const r=currentRecord();if(r){r.values.primaryDisorder=DISORDERS.includes(e.target.value)?e.target.value:'';update();}}if(e.target.matches('[data-profile]')){const c=activeCase();if(c){c.profile[e.target.dataset.profile]=e.target.value;update();}}if(e.target.id==='recordTime'){const r=currentRecord();if(r){r.time=e.target.value;save();renderLayout();}}if(e.target.id==='chartMetric')renderEvolution();});
 document.addEventListener('click',e=>{const tab=e.target.closest('[data-record]');if(tab){recordId=tab.dataset.record;renderLayout();return;}const scienceTab=e.target.closest('[data-pf-tab]');if(scienceTab){renderScienceTab(scienceTab.dataset.pfTab);return;}const card=e.target.closest('[data-info]');if(card)info(card.dataset.info);});
+document.getElementById('openIntegration').onclick=()=>info('integracao');
 document.getElementById('closeDialog').onclick=()=>document.getElementById('infoDialog').close();
 renderLayout();

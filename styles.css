@@ -56,3 +56,14 @@ dialog:has(.pf-tabs){max-width:730px;max-height:min(88vh,850px);overflow-y:auto}
 .comp-foot{margin:10px 0 0;font-size:12px;color:#647d8d}
 @media(max-width:900px){.acid-sections{grid-template-columns:1fr}}
 @media(max-width:570px){.acid-block{padding:14px}}
+
+/* v0.5.5 — acesso discreto ao diálogo de integração, sem novos campos */
+.integrated-link{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;padding:14px 17px;border:1px solid #dfe9ef;background:#f8fafc;border-radius:12px}
+.integrated-link strong{display:block;font-size:14px;color:#21465c}
+.integrated-link span{display:block;font-size:12px;color:#657c8d;margin-top:4px}
+.integrated-link button{white-space:normal;text-align:center}
+.integrated-readout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+.integrated-readout>div{background:#f6f9fb;border:1px solid #e0e9ef;border-radius:9px;padding:12px}
+.integrated-readout small{font-size:11px;display:block;color:#647b8c}
+.integrated-readout strong{font-size:21px;color:#193e55;display:block;margin-top:4px}
+@media(max-width:620px){.integrated-link{align-items:stretch;flex-direction:column}.integrated-readout{grid-template-columns:repeat(2,minmax(0,1fr))}}

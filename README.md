@@ -1,4 +1,4 @@
-# Fisiologia Perioperatória — v0.5.4
+# Fisiologia Perioperatória — v0.5.5
 
 Plataforma educacional estática para casos fictícios/desidentificados, com registros seriados, gráficos, fichas científicas e backup em JSON.
 
@@ -78,7 +78,7 @@ Abra um caso, informe Hb=15, SaO₂=98%, PaO₂=100 mmHg e clique na ficha de Ca
 
 Após criar ou carregar um caso, deixe o pH arterial vazio e informe pH venoso central de 7,30. Deve aparecer **pH arterial ≈ (estimativa) = 7,34**. Abra a ficha para ver a faixa **7,33–7,35**. Depois informe pH arterial 7,36: o cartão estimado deve desaparecer e dar lugar a **ΔpH medido = 0,06**. Não publique antes de conferir essas condições no Chrome.
 
-## v0.5.4 — Três fichas da Investigação Científica 004
+## v0.5.5 — Três fichas da Investigação Científica 004
 
 - CcvO₂, C(a−cv)O₂ e extração central estimada agora dispõem, individualmente, de quatro abas: Entender, Fórmula, Limitações, Referências.
 - Cálculos **dinâmicos** com o registro ativo; CcvO₂ discrimina o O₂ ligado à Hb, dissolvido e a origem da Hb (venosa medida ou arterial usada como hipótese).
@@ -95,3 +95,11 @@ Carregue ou crie um caso. Entre com Hb 10 g/dL, SaO₂ 98%, PaO₂ 100 mmHg, Scv
 ### Referências
 - https://pmc.ncbi.nlm.nih.gov/articles/PMC7921020/
 - https://pmc.ncbi.nlm.nih.gov/articles/PMC13195361/
+
+
+## v0.5.5 — Ficha integrada dos índices de perfusão
+- Adicionado somente um acesso discreto "Explorar integração fisiológica" na seção de resultados: sem campos novos e sem novas métricas automaticamente diagnósticas.
+- Ficha em quatro abas (Entender, Fórmula, Limitações, Referências) para interpretar ScvO₂, ΔPcv-aCO₂, C(a−cv)O₂ e lactato. Os quatro valores são extraídos do registro ativo, sem inferir mecanismo.
+- Razão ΔPCO₂/C(a−cv)O₂ calculada somente dentro da aba Fórmula, rotulada como demonstração exploratória dimensional, nunca equiparada ao quociente respiratório RQ; não exibida se denominador ≤ 0,5 mL/dL ou dados ausentes.
+- Evidências: Dubin et al. 2020, Gutierrez et al. 2025 (epub 2024), Su et al. 2018 e Janotka & Ostadal 2021.
+- Preservados formatos do JSON, chave localStorage, cálculos e campos anteriores. Não validada para decisões clínicas.
