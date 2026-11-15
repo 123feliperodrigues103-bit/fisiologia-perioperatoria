@@ -11,8 +11,8 @@ const profileGroups=[['age','Idade','anos'],['sex','Sexo para PBW',''],['height'
 // Os identificadores dos campos antigos são preservados no armazenamento local e no JSON.
 // O formulário mostra apenas as medidas mais úteis; parâmetros avançados são recolhíveis.
 const fields={
- arterialFields:[['fio2','FiO₂','%'],['hb','Hb arterial','g/dL'],['aph','pH',''],['apo2','PaO₂','mmHg'],['apco2','PaCO₂','mmHg'],['aso2','SaO₂','%'],['hco3','HCO₃⁻ informado','mmol/L']],
- venousFields:[['hbv','Hb venosa · opcional','g/dL'],['vph','pH venoso',''],['vpo2','PcvO₂','mmHg'],['vpco2','PcvCO₂','mmHg'],['vso2','ScvO₂','%'],['vhco3','HCO₃⁻ venoso informado','mmol/L']],
+ arterialFields:[['fio2','FiO₂','%'],['hb','Hb arterial','g/dL'],['aph','pH',''],['apo2','PaO₂','mmHg'],['apco2','PaCO₂','mmHg'],['aso2','SaO₂','%'],['hco3','HCO₃⁻ informado','mmol/L'],['be','BE arterial (laudo)','mEq/L']],
+ venousFields:[['hbv','Hb venosa · opcional','g/dL'],['vph','pH venoso',''],['vpo2','PcvO₂','mmHg'],['vpco2','PcvCO₂','mmHg'],['vso2','ScvO₂','%'],['vhco3','HCO₃⁻ venoso informado','mmol/L'],['bev','BE venoso central (laudo)','mEq/L']],
  ventFields:[['vt','VC expirado','mL'],['rr','FR total','irpm'],['minute','VM medido','L/min'],['pause','Pausa inspiratória','%'],['ieratio','Relação I:E (ex.: 1:2)',''],['pplat','Platô (Pplat)','cmH₂O'],['peep','PEEP','cmH₂O'],['ppeak','Pico (Ppico)','cmH₂O']],
  hemoFields:[['co','Débito cardíaco','L/min'],['hr','FC','bpm'],['map','PAM','mmHg'],['cvp','PVC','mmHg']],
  advancedFields:[['pb','Pressão barométrica','mmHg'],['rq','Quociente respiratório assumido','']],
@@ -34,6 +34,10 @@ const definitions={
  dco2:['Gradiente venoso central–arterial de PCO₂','Diferença de pressões parciais de CO₂, não de conteúdos.','ΔPCO₂ = PcvCO₂ − PaCO₂','Não mede débito cardíaco ou hipoperfusão diretamente.'],
  dph:['Diferença arterial–venosa de pH','ΔpH real de amostras arterial e venosa central pareadas.','ΔpH = pHa − pHcv','Valor descritivo. pH é logarítmico; ΔpH não diagnostica choque e não deve ser confundido com estimativa arterial a partir de amostra venosa.'],
  phest:['pH arterial APROXIMADO (somente venosa central)','Estimativa populacional de pH arterial em situação em que não foi informado pH arterial.','pHa estimado ≈ pHcv + (0,03 a 0,05)','Faixa heurística, não intervalo de previsão de 95%; pode falhar especialmente em choque, instabilidade ou distúrbios acidobásicos extremos. Nunca é usada para outros cálculos.'],
+ bea:['BE arterial informado (laudo)','Valor de BE tal como fornecido no laudo de gasometria arterial.','BE(B) e BEecf/SBE são variantes calculadas pelo analisador.','Conferir a convenção do equipamento: BE(B) não é idêntico a SBE/BEecf.'],
+ bev:['BE venoso central informado (laudo)','Valor de BE tal como fornecido no laudo de gasometria venosa central.','BE(B) e BEecf/SBE são variantes calculadas pelo analisador.','Não presumir que o BE venoso central representa exatamente o arterial.'],
+ sbea:['SBE arterial estimado — Van Slyke','Estimativa do base excess padronizado a partir de pH e HCO₃⁻ arterial quando BE não foi informado.','SBE ≈ 0,9287 × [HCO₃⁻ − 24,4 + 14,83 × (pH − 7,40)]','Não substitui o valor de BE do laudo e depende dos dados e das constantes utilizadas.'],
+ sbev:['SBE venoso central estimado — Van Slyke','Estimativa do SBE a partir de pH e HCO₃⁻ venoso central quando BE não foi informado.','SBE ≈ 0,9287 × [HCO₃⁻ − 24,4 + 14,83 × (pH − 7,40)]','Não é uma medida arterial nem substitui o valor informado pelo gasômetro.'],
  hco3a:['HCO₃⁻ arterial — Henderson–Hasselbalch','Bicarbonato calculado a partir de pH arterial e PaCO₂.','[HCO₃⁻] = 0,0301 × PaCO₂ × 10^(pH−6,1)','É matematicamente derivado dos dados de gasometria: não é uma terceira medida independente.'],
  hco3v:['HCO₃⁻ venoso central — Henderson–Hasselbalch','Bicarbonato calculado a partir de pH venoso central e PcvCO₂.','[HCO₃⁻] = 0,0301 × PcvCO₂ × 10^(pHvenoso−6,1)','Não equivale automaticamente ao bicarbonato arterial.'],
  hplusA:['Atividade/concentração aproximada de H⁺ arterial','Conversão da escala logarítmica de pH para concentração molar aproximada.','[H⁺] ≈ 10^(9−pH) nmol/L','pH é o logaritmo da atividade de H⁺; conversão é uma aproximação de concentração.'],
@@ -68,7 +72,7 @@ const definitions={
  leak:['Diferença relativa entre VTi e VTe','Diferença inspiratório-expiratória relativa ao volume inspirado.','100 × (VTi − VTe)/VTi','Não diagnostica vazamento isoladamente; sensores, compressibilidade e fluxo fresco interferem.']
 };
 const metricGroups=[
- ['EQUILÍBRIO ACIDOBÁSICO',[['hco3a','HCO₃⁻ arterial (H–H)','mmol/L',1],['hco3v','HCO₃⁻ venoso (H–H)','mmol/L',1],['hplusA','H⁺ arterial','nmol/L',1],['hplusV','H⁺ venoso','nmol/L',1],['sidnacl','Na⁺ − Cl⁻ (SID aprox.)','mmol/L',1],['sids','SID simplificado','mEq/L',1],['sida','SID aparente','mEq/L',1],['side','SID efetivo','mEq/L',1],['sig','SIG','mEq/L',1],['ag','Ânion gap (sem K⁺)','mmol/L',1],['agcorr','AG corrigido (albumina)','mmol/L',1]]],
+ ['EQUILÍBRIO ACIDOBÁSICO',[['hco3a','HCO₃⁻ arterial (H–H)','mmol/L',1],['hco3v','HCO₃⁻ venoso (H–H)','mmol/L',1],['bea','BE arterial informado','mEq/L',1],['sbea','SBE arterial estimado','mEq/L',1],['bev','BE venoso central informado','mEq/L',1],['sbev','SBE venoso estimado','mEq/L',1],['hplusA','H⁺ arterial','nmol/L',1],['hplusV','H⁺ venoso','nmol/L',1],['sidnacl','Na⁺ − Cl⁻ (SID aprox.)','mmol/L',1],['sids','SID simplificado','mEq/L',1],['sida','SID aparente','mEq/L',1],['side','SID efetivo','mEq/L',1],['sig','SIG','mEq/L',1],['ag','Ânion gap (sem K⁺)','mmol/L',1],['agcorr','AG corrigido (albumina)','mmol/L',1]]],
  ['COMPENSAÇÃO ACIDOBÁSICA',[['pco2exp','PaCO₂ esperada','mmHg',1],['hco3exp','HCO₃⁻ esperado','mmol/L',1]]],
  ['GASOMETRIA E OXIGENAÇÃO',[['pf','Relação P/F','mmHg',1],['dco2','ΔPCO₂','mmHg',1],['dph','ΔpH medido','',2],['phest','pH arterial ≈ (estimativa)','aproximado',2],['cao2','CaO₂','mL/dL',2],['cvo2','CcvO₂ calculado','mL/dL',2],['aav','C(a−cv)O₂','mL/dL',2],['eo2','Extração central estimada','%',1],['pao2','PAO₂ estimada','mmHg',1],['aagrad','Gradiente A–a','mmHg',1]]],
  ['PACIENTE E VENTILAÇÃO',[['pbw','PBW','kg',1],['bsa','Superfície corporal','m²',2],['vtpbw','VC/PBW','mL/kg',1],['ve','VM calculado','L/min',2],['ie','Relação I:E','',2]]],
@@ -140,6 +144,11 @@ function compute(d,p){
  const hco3v=maybe(pHv,pv)?0.0301*pv*Math.pow(10,pHv-6.1):null;
  const comp=compensation(d,{hco3a,hco3v});
  const hco3ReportedA=get('hco3',0.1,80),hco3ReportedV=get('vhco3',0.1,80);
+ const beReportedA=get('be',-50,50),beReportedV=get('bev',-50,50);
+ // Não converter BE(B) reportado em SBE; sem valor reportado, estimar apenas SBE.
+ // Usar HCO₃⁻ da MESMA amostra, informado no laudo ou calculado por H–H.
+ const sbeArterial=maybe(pHa,hco3ReportedA??hco3a)?0.9287*((hco3ReportedA??hco3a)-24.4+14.83*(pHa-7.4)):null;
+ const sbeVenous=maybe(pHv,hco3ReportedV??hco3v)?0.9287*((hco3ReportedV??hco3v)-24.4+14.83*(pHv-7.4)):null;
  const hco3Best=hco3ReportedA??hco3a??hco3ReportedV??hco3v;
  const na=get('na',80,200),k=get('k',0.1,15),cl=get('cl',50,160),lactate=get('lactate',0,35),caion=get('caion',0.1,4),mg=get('mg',0.1,6);
  const albumin=get('albumin',0,8),phosphate=get('phosphate',0,12);
@@ -152,7 +161,7 @@ function compute(d,p){
  const side=maybe(hco3a,chargeWeak)?hco3a+chargeWeak:null;
  const ie=ratioToNumber(d.ieratio)??(maybe(rr,get('ti',0.05,30))&&60/rr>d.ti?(60/rr-d.ti)/d.ti:null);
  Object.assign(out,{
-  hco3a,hco3v,hplusA:pHa===null?null:Math.pow(10,9-pHa),hplusV:pHv===null?null:Math.pow(10,9-pHv),sidnacl:sidNaCl,sids:simpleSid,sida,side,sig:maybe(sida,side)?sida-side:null,ag:anionGap,agcorr:correctedAG,pco2exp:comp?.kind==='pco2'&&Number.isFinite(comp.middle)?comp.middle:null,hco3exp:comp?.kind==='hco3'&&Number.isFinite(comp.middle)?comp.middle:null,
+  hco3a,hco3v,bea:beReportedA,bev:beReportedV,sbea:beReportedA===null?sbeArterial:null,sbev:beReportedV===null?sbeVenous:null,hplusA:pHa===null?null:Math.pow(10,9-pHa),hplusV:pHv===null?null:Math.pow(10,9-pHv),sidnacl:sidNaCl,sids:simpleSid,sida,side,sig:maybe(sida,side)?sida-side:null,ag:anionGap,agcorr:correctedAG,pco2exp:comp?.kind==='pco2'&&Number.isFinite(comp.middle)?comp.middle:null,hco3exp:comp?.kind==='hco3'&&Number.isFinite(comp.middle)?comp.middle:null,
   pf:maybe(fio,pa)?pa/(fio/100):null,dco2:maybe(pc,pv)?pv-pc:null,dph:maybe(pHa,pHv)?pHa-pHv:null,
   // Estimativa populacional em paciente presumidamente estável: sem amostra arterial,
   // e apenas para pH venoso central fora dos extremos de distúrbio acidobásico.
@@ -218,8 +227,8 @@ function renderEvolution(){const c=activeCase();if(!c)return;
  const line=points.map(p=>`${x(p.i)},${y(p.v)}`).join(' ');
  canvas.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolução de ${esc(allMetrics.find(m=>m[0]===chosen)?.[1]||chosen)}"><g fill="none" stroke="#dfe7ee">${[0,1,2,3,4].map(i=>`<line x1="${left}" y1="${top+(h-top-bottom)*i/4}" x2="${w-right}" y2="${top+(h-top-bottom)*i/4}"/>`).join('')}</g><g font-size="11" fill="#718799">${[0,1,2,3,4].map(i=>`<text x="${left-8}" y="${top+(h-top-bottom)*i/4+4}" text-anchor="end">${fmt(max-(max-min)*i/4,1)}</text>`).join('')}${cols.map((r,i)=>`<text x="${x(i)}" y="${h-15}" text-anchor="middle">R${i+1}</text>`).join('')}</g><polyline points="${line}" fill="none" stroke="#287da6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${points.map(p=>`<circle cx="${x(p.i)}" cy="${y(p.v)}" r="4.5" fill="#287da6"><title>Registro ${p.i+1}: ${fmt(p.v,2)}</title></circle>`).join('')}</svg>`;
 }
-function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='integracao'||key==='pf'||key==='dco2'||key==='cao2'||['cvo2','aav','eo2'].includes(key)||key==='dph'||key==='phest'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig','pco2exp','hco3exp'].includes(key)){
- const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.dataset.scienceKind=['hco3a','hco3v','hplusA','hplusV'].includes(key)?'hh':(['sids','sida','side','sig'].includes(key)?'stewart':(['pco2exp','hco3exp'].includes(key)?'compensation':key));bar.setAttribute('role','tablist');for(const t of pfTabs){const button=document.createElement('button');button.type='button';button.textContent=t.label;button.dataset.pfTab=t.id;button.setAttribute('role','tab');bar.appendChild(button);}const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';node.append(bar,content);renderScienceTab('entender');
+function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='integracao'||key==='pf'||key==='dco2'||key==='cao2'||['cvo2','aav','eo2'].includes(key)||key==='dph'||key==='phest'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig','pco2exp','hco3exp'].includes(key)||['bea','bev','sbea','sbev'].includes(key)){
+ const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.dataset.scienceKind=['hco3a','hco3v','hplusA','hplusV'].includes(key)?'hh':(['sids','sida','side','sig'].includes(key)?'stewart':(['pco2exp','hco3exp'].includes(key)?'compensation':(['bea','bev','sbea','sbev'].includes(key)?'baseexcess':key)));bar.setAttribute('role','tablist');for(const t of pfTabs){const button=document.createElement('button');button.type='button';button.textContent=t.label;button.dataset.pfTab=t.id;button.setAttribute('role','tab');bar.appendChild(button);}const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';node.append(bar,content);renderScienceTab('entender');
  }else{const p=document.createElement('p');p.textContent=description;node.appendChild(p);const eq=document.createElement('div');eq.className='equation';eq.textContent=equation;node.appendChild(eq);const r=currentRecord(),c=activeCase(),result=r&&c?compute(r.values,c.profile)[key]:null;const show=document.createElement('p');show.textContent=`Resultado do registro: ${key==='ie'&&Number.isFinite(result)?fmtIE(result):fmt(result,2)} ${allMetrics.find(m=>m[0]===key)?.[2]||''}`;node.appendChild(show);const note=document.createElement('p');note.textContent=limit;node.appendChild(note);}document.getElementById('infoDialog').showModal();}
 
 const pfTabs = [
@@ -543,6 +552,7 @@ function integrationPanel(tab){
  const gap=Number.isFinite(m.dco2)?m.dco2:null;
  const diff=Number.isFinite(m.aav)?m.aav:null;
  const sv=val(d,'vso2',0,100),lact=val(d,'lactate',0,35);
+ const beShown=m.bea??m.sbea??null,beLabel=Number.isFinite(m.bea)?'BE arterial informado':Number.isFinite(m.sbea)?'SBE arterial estimado':'BE arterial';
  // Denominadores pequenos amplificam erros de amostragem e arredondamento.
  const ratio=(gap!==null&&diff!==null&&diff>0.5)?gap/diff:null;
  const valOr=(v,places=1)=>Number.isFinite(v)?fmt(v,places):'não disponível';
@@ -551,12 +561,14 @@ function integrationPanel(tab){
    <div><small>ΔPcv−aCO₂ · pressão</small><strong>${valOr(gap,1)}${gap===null?'':' mmHg'}</strong></div>
    <div><small>C(a−cv)O₂ · diferença de conteúdos</small><strong>${valOr(diff,2)}${diff===null?'':' mL/dL'}</strong></div>
    <div><small>Lactato informado</small><strong>${valOr(lact,1)}${lact===null?'':' mmol/L'}</strong></div>
+   <div><small>${beLabel}</small><strong>${valOr(beShown,1)}${beShown===null?'':' mEq/L'}</strong></div>
   </div>`;
  if(tab==='entender')return `<h3>Por que os indicadores podem parecer contraditórios?</h3>
   <p>Uma <strong>ScvO₂ elevada</strong> indica que o sangue venoso central ainda contém grande proporção de Hb oxigenada. Isso pode ocorrer por redução do consumo regional, aumento da oferta relativa, heterogeneidade de fluxo ou dificuldade de extração. <strong>Não é prova de perfusão tecidual adequada.</strong></p>
   <p>O <strong>ΔPCO₂</strong> relaciona a pressão parcial de CO₂ venosa central à arterial. Pode aumentar quando a remoção circulatória de CO₂ é insuficiente em relação à sua produção, mas também é influenciado pela relação entre conteúdo e pressão de CO₂, Hb, oxigenação e estado acidobásico.</p>
   <div class="concept-note"><strong>Questão central:</strong> ScvO₂ de 82% com ΔPCO₂ de 10 mmHg é uma combinação fisiologicamente possível. Não comprova, por si só, baixo débito, choque, shunt microvascular ou metabolismo anaeróbico.</div>
   ${current}<p>O <strong>lactato</strong> reflete produção e depuração; pode elevar-se com hipóxia, estimulação adrenérgica, medicamentos e alterações metabólicas ou de depuração. Um único valor não define sua causa.</p>
+  <p>O <strong>BE</strong> complementa a avaliação do componente não respiratório da alteração acidobásica. Um BE muito negativo expressa maior déficit de bases na convenção adotada, mas não indica qual ácido ou mecanismo o produziu: compare com lactato, ânion gap, albumina, cloreto e SID. O valor do laudo pode ser BE(B) ou BEecf/SBE.</p>
   <p>Compare os registros e as condições de coleta: momento cirúrgico, circulação, Hb, ventilação, intervenções e origem da amostra. A evolução acrescenta contexto, mas não prova causalidade.</p>`;
  if(tab==='formula')return `<h3>De onde surgiu a razão ΔPCO₂/C(a−cv)O₂?</h3>
   <p>Em um estado estacionário, o princípio de Fick para a circulação sistêmica relaciona as taxas de troca gasosa às diferenças de <strong>conteúdo</strong> arterial e venoso <strong>misto</strong>.</p>
@@ -591,6 +603,55 @@ function integrationPanel(tab){
  </ol><p class="subtle">Síntese original da Investigação Científica 005. Distingue proposição fisiológica, associação observacional e demonstração de benefício clínico. Não é recomendação de manejo.</p>`;
 }
 
+// v0.5.6 — BE informado no laudo e SBE calculado em sua ausência; sem reinterpretação automática.
+function bePanel(tab){
+ const d=currentRecord()?.values||{}, c=activeCase();
+ const r=c?compute(d,c.profile):{};
+ const bea=val(d,'be',-50,50),bev=val(d,'bev',-50,50);
+ const ha=val(d,'aph',6,8),hv=val(d,'vph',6,8);
+ const pc=val(d,'apco2',0.1,200),pv=val(d,'vpco2',0.1,200);
+ const reportedHco3A=val(d,'hco3',0.1,80),reportedHco3V=val(d,'vhco3',0.1,80);
+ const hA=reportedHco3A??r.hco3a??null,hV=reportedHco3V??r.hco3v??null;
+ const calc=(h,ph)=>Number.isFinite(h)&&Number.isFinite(ph)?0.9287*(h-24.4+14.83*(ph-7.40)):null;
+ const calculatedA=calc(hA,ha),calculatedV=calc(hV,hv);
+ const n=(x,p=1)=>Number.isFinite(x)?fmt(x,p):'não disponível';
+ const valCard=(name,reported,sbe,ph,hco3,source)=>`<div class="worked-example"><span class="eyebrow">${name}</span>
+  <p><strong>BE informado:</strong> ${n(reported)}${reported===null?'':' mEq/L'}${reported===null?' (ausente no registro)':''}</p>
+  <p><strong>SBE calculado para comparação didática:</strong> ${n(sbe)}${sbe===null?'':' mEq/L'}</p>
+  <p class="subtle">pH ${n(ph,2)} · HCO₃⁻ ${n(hco3)} mmol/L (${source}).</p></div>`;
+ const example=valCard('ARTERIAL',bea,calculatedA,ha,hA,reportedHco3A!==null?'informado':Number.isFinite(r.hco3a)?'calculado por H–H':'não disponível')+
+    valCard('VENOSA CENTRAL',bev,calculatedV,hv,hV,reportedHco3V!==null?'informado':Number.isFinite(r.hco3v)?'calculado por H–H':'não disponível');
+ if(tab==='entender')return `<h3>O que significa Base Excess?</h3>
+  <p>O <strong>Base Excess (BE)</strong> é a quantidade teórica de ácido forte ou base forte necessária para titular o sangue, sob condições de referência (<strong>37 °C, PCO₂ 40 mmHg e pH 7,40</strong>). É calculado a partir de propriedades acidobásicas e ajuda a descrever o <strong>componente não respiratório</strong> do distúrbio.</p>
+  <p>BE próximo de zero representa uma referência habitual; <strong>BE negativo</strong> (ou base deficit positivo) sugere componente metabólico acidificante e <strong>BE positivo</strong>, componente alcalinizante. Como regra orientadora, a faixa de referência é aproximadamente −2 a +2 mEq/L, variando conforme laboratório e método.</p>
+  <div class="concept-note"><strong>Atenção:</strong> o gasômetro <em>não dosa diretamente</em> o BE. Ele calcula BE(B) ou BEecf/SBE usando pH, PCO₂, HCO₃⁻ derivado e, conforme o algoritmo, Hb. O campo do site registra o <strong>valor do laudo</strong>, sem presumir qual variante foi usada.</div>
+  ${example}
+  <p>O BE não identifica a causa da acidose. Por exemplo, BE −10 mEq/L pode coexistir com lactato elevado, acidose hiperclorêmica, retenção de ânions não medidos ou uma combinação desses processos. Integre com albumina, AG, SID, lactato e evolução temporal.</p>`;
+ if(tab==='formula')return `<h3>BE(B) versus SBE/BEecf</h3>
+  <p><strong>BE(B)</strong> representa o excesso/déficit de base calculado para a amostra de <em>sangue total</em>, considerando seu tamponamento hemoglobínico. <strong>BEecf/SBE</strong> é uma padronização que aproxima o comportamento do compartimento extracelular; em formulações usuais considera uma concentração efetiva de Hb de aproximadamente 5 g/dL.</p>
+  <div class="equation equation-large">SBE ≈ 0,9287 × [HCO₃⁻ − 24,4 + 14,83 × (pH − 7,40)]</div>
+  <p>HCO₃⁻ em mmol/L e SBE em mEq/L. Para <strong>estimar o SBE</strong>, usamos o HCO₃⁻ informado da mesma amostra ou, se ausente, o calculado por Henderson–Hasselbalch. A fórmula exibida é uma versão de Van Slyke; fabricantes podem adotar outras constantes.</p>
+  ${example}
+  <p>Se o BE foi informado, <strong>ele é preservado como a observação do laudo</strong>, e o SBE acima fica apenas como demonstração na ficha. Quando o BE não é informado, o cartão de resultados exibirá <strong>SBE estimado</strong> como uma variável distinta.</p>
+  <p>Em pacientes com ventilação controlada, reduzir a PaCO₂ pode elevar o pH sem corrigir a causa da acidose metabólica. O SBE busca reduzir a interferência da PCO₂, mas não é perfeitamente independente dela.</p>`;
+ if(tab==='limites')return `<h3>Limitações e armadilhas</h3><ul class="science-list">
+  <li><strong>Não é uma medida independente:</strong> BE é derivado do estado acidobásico já representado por pH, PCO₂ e bicarbonato; não equivale a uma terceira dosagem de ácido.</li>
+  <li><strong>BE(B) ≠ SBE:</strong> os algoritmos modelam compartimentos e tamponamento diferentes. Comparar valores de laudos de equipamentos distintos pode mostrar pequenas discrepâncias sem mudança clínica real.</li>
+  <li><strong>BE não revela o ânion:</strong> BE negativo pode refletir lactato, hipercloremia, ácidos não mensurados ou efeitos combinados; albumina e fosfato também interferem. Não atribuir todo déficit de bases a lactato.</li>
+  <li><strong>Venoso central ≠ arterial:</strong> sobretudo em choque e hipoperfusão, pH, PCO₂ e BE podem divergir. Não converter BE venoso em BE arterial usando um ajuste fixo.</li>
+  <li><strong>SBE calculado é aproximação:</strong> pressupõe constantes e condições de referência; o uso de HCO₃⁻ calculado por H–H compartilha os mesmos dados básicos do pH/PCO₂.</li>
+  <li><strong>Não prescreve bicarbonato:</strong> magnitude do déficit de bases não equivale à dose a administrar nem identifica indicação terapêutica. A etiologia, a ventilação e a circulação importam.</li>
+  <li><strong>Tempo importa:</strong> a melhora do BE e do lactato após recuperação hemodinâmica pode não ocorrer no mesmo momento, e nenhum índice isolado prova resolução da hipoperfusão.</li>
+  </ul><div class="concept-note">Compare BE com pH, HCO₃⁻, AG corrigido para albumina, Na–Cl/SID, lactato e contexto cirúrgico. O parâmetro é descritivo, não diagnóstico etiológico automático.</div>`;
+ return `<h3>Referências e convenções</h3><ol class="science-list">
+  <li>Siggaard-Andersen O. <em>The van Slyke equation.</em> Scand J Clin Lab Invest Suppl. 1977;146:15–20. <a href="https://pubmed.ncbi.nlm.nih.gov/13478/" target="_blank" rel="noopener noreferrer">Artigo original</a>.</li>
+  <li>Kellum JA. <em>Clinical review: Reunification of acid–base physiology.</em> Crit Care. 2005. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC1297616/" target="_blank" rel="noopener noreferrer">Derivação e limitações do SBE</a>.</li>
+  <li><em>Understanding base excess (BE): merits and pitfalls.</em> Intensive Care Med. 2022. <a href="https://link.springer.com/article/10.1007/s00134-022-06748-4" target="_blank" rel="noopener noreferrer">Diferenças entre BE(B) e BEecf</a>.</li>
+  <li>Recomendações de painel francês. <em>Diagnosis and management of metabolic acidosis.</em> Ann Intensive Care. 2019. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6695455/" target="_blank" rel="noopener noreferrer">Consenso e interpretação</a>.</li>
+  <li>Park M et al. <em>Partitioning evolutive standard base excess determinants in septic shock patients.</em> Rev Bras Ter Intensiva. 2007. <a href="https://www.scielo.br/j/rbti/a/5vMXHFf7db5GyJKSmzgCyyd/" target="_blank" rel="noopener noreferrer">Van Slyke e integração com Stewart</a>.</li>
+ </ol><p class="subtle">Nomenclatura e algoritmo devem ser conferidos no laudo do equipamento. Conteúdo educacional não validado para decisão assistencial.</p>`;
+}
+
 function renderScienceTab(tab){
  const bar=document.getElementById('pfTabBar');
  if(!bar)return;
@@ -600,7 +661,7 @@ function renderScienceTab(tab){
   button.setAttribute('aria-selected',String(active));
  });
  const kind=bar.dataset.scienceKind;
- document.getElementById('pfTabContent').innerHTML=kind==='integracao'?integrationPanel(tab):kind==='dco2'?dco2Panel(tab):kind==='hh'?hhPanel(tab):kind==='stewart'?stewartPanel(tab):kind==='compensation'?compensationPanel(tab):kind==='cao2'?cao2Panel(tab):['cvo2','aav','eo2'].includes(kind)?oxygenVenousPanel(tab,kind):kind==='dph'||kind==='phest'?dphPanel(tab):pfPanel(tab);
+ document.getElementById('pfTabContent').innerHTML=kind==='integracao'?integrationPanel(tab):kind==='dco2'?dco2Panel(tab):kind==='hh'?hhPanel(tab):kind==='stewart'?stewartPanel(tab):kind==='compensation'?compensationPanel(tab):kind==='baseexcess'?bePanel(tab):kind==='cao2'?cao2Panel(tab):['cvo2','aav','eo2'].includes(kind)?oxygenVenousPanel(tab,kind):kind==='dph'||kind==='phest'?dphPanel(tab):pfPanel(tab);
 }
 function switchCase(id){activeId=id;recordId=activeCase()?.records[0]?.id||null;renderLayout();}
 function update(){save();renderResults();}

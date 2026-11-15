@@ -1,8 +1,26 @@
-# Fisiologia Perioperatória — v0.5.5
+# Fisiologia Perioperatória — v0.5.6
 
-Plataforma educacional estática para casos fictícios/desidentificados, com registros seriados, gráficos, fichas científicas e backup em JSON.
+## Novo nesta versão
 
-## Novidades
+- BE arterial e venoso central **informados no laudo** como entradas numéricas opcionais. O valor do gasômetro tem prioridade.
+- Quando faltar o BE de uma amostra, a plataforma calcula **SBE estimado** usando pH e bicarbonato informado daquela mesma amostra ou, se ausente, o HCO₃⁻ calculado por Henderson–Hasselbalch. Não apresenta BE(B) calculado como equivalente ao SBE.
+- Ficha científica de Base Excess com quatro abas (Entender, Fórmula, Limitações, Referências), exemplos dinâmicos e distinção BE(B) versus BEecf.
+- Inclusão de BE no painel de integração fisiológica, sem novas decisões ou diagnósticos automáticos.
+- Chaves `be` e `bev` são opcionais no mesmo JSON/formato v0.4, sem migração de casos e sem alterar a chave localStorage. Os dados antigos continuam compatíveis.
+- BE do equipamento é ele mesmo calculado e pode variar conforme o algoritmo; se o laudo não especificar BE(B)/BEecf o site não presume a modalidade.
+
+## Fórmula do SBE didático
+
+SBE = 0,9287 × [HCO₃⁻ − 24,4 + 14,83 × (pH − 7,40)], em mEq/L. Usar HCO₃⁻ em mmol/L. Não interpretar um BE negativo como diagnóstico isolado de acidose láctica ou indicação de bicarbonato.
+
+## Referências
+
+- Siggaard-Andersen: https://pubmed.ncbi.nlm.nih.gov/13478/
+- Kellum: https://pmc.ncbi.nlm.nih.gov/articles/PMC1297616/
+- Understanding base excess (2022): https://link.springer.com/article/10.1007/s00134-022-06748-4
+- French expert guidelines (2019): https://pmc.ncbi.nlm.nih.gov/articles/PMC6695455/
+
+## Histórico e compatibilidade
 
 - Ventilação reduzida aos campos usuais do carrinho: VC expirado, FR, VM, pausa inspiratória, I:E, Pplat, PEEP e Ppico. A FiO₂ permanece na seção de gasometria arterial.
 - Módulo de equilíbrio acidobásico com bicarbonato calculado por Henderson–Hasselbalch (arterial e venoso central), H⁺, SID simplificado, SID aparente, SID efetiva e SIG.
