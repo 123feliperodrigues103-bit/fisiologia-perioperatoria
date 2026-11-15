@@ -1,3 +1,39 @@
+# Fisiologia Perioperatória — v0.5.7.1 (candidata para teste)
+
+## Quatro formas de incluir uma gasometria
+
+O botão **Importar gasometria** abre um painel com quatro abas:
+
+1. **Manual:** os campos atuais continuam disponíveis e inalterados.
+2. **Colar texto:** cole o laudo copiado do sistema do laboratório (inclusive intervalos de referência). O parser JavaScript reconhece os valores do paciente, separa intervalos, identifica rótulos, usa a origem arterial/venosa central explicitamente informada e oferece **prévia editável**. Não transforma horário de emissão do laudo em horário da coleta.
+3. **Foto:** escolha JPG/PNG/WEBP (até 10 MB). O Tesseract.js 5.1.1 é carregado sob demanda do CDN e faz OCR **no próprio navegador**, sem enviar a imagem a uma API de IA. Exige internet para baixar o motor, WebAssembly e idiomas, especialmente na primeira utilização; o OCR pode falhar em fotos desfocadas. Depois da leitura, o texto fica disponível para correção e análise pelo mesmo parser de texto. O teste automatizado cobriu o fluxo da interface com OCR simulado, **não o reconhecimento real da foto pela biblioteca em todos os navegadores**. Priorize testar em HTTPS após revisão local.
+4. **JSON + IA:** instrução copiável, com esquema e chaves oficiais, para qualquer IA capaz de interpretar imagem/texto e gerar um arquivo `.json`. Continua usando o botão existente **Importar JSON**, que adiciona casos e não substitui os atuais.
+
+## Segurança da prévia e do armazenamento
+
+- O site pede conferência **explícita** da origem arterial ou venosa central antes de preencher. Um laudo identificado apenas como "amostra não específica" **não é presumido arterial**.
+- O usuário pode corrigir, omitir ou manter valores; todos devem estar dentro de limites técnicos de entrada. Resultados com unidades incompatíveis são rejeitados (ex.: lactato em mg/dL não é convertido silenciosamente).
+- A opção padrão cria **novo registro no caso ativo**; é possível preencher o registro atual (aviso de sobreposição) ou criar caso novo. Não armazena texto bruto/imagen; ficam apenas valores e uma observação genérica desidentificada.
+- Textos com cabeçalhos arterial e venoso misturados são bloqueados para impedir que dados de duas amostras sejam escritos como uma.
+- O texto da gasometria e a imagem não são enviados ao backend pelo código da plataforma. Na opção de foto, o navegador faz requisições de **download das bibliotecas e modelos de OCR** a fornecedores externos (CDN); para segurança de dados clínicos, use apenas material fictício ou anonimizado e respeite as regras do serviço/LGPD.
+- O JSON não contém criptografia; enviar laudos a IA de terceiros implica outro serviço e outra política de tratamento de dados. **Remova dados identificáveis antes de compartilhar**.
+- O valor BE do laudo é armazenado como apresentado, sem assumir BE(B) versus BEecf. CO₂ total, glicose, hematócrito e outras variáveis sem campo no site são reconhecidas ou ignoradas, mas não criam cálculos novos.
+
+## Testes no navegador
+
+- Laudo venoso central no formato fornecido pelo usuário: **pH 7,34; PcvO₂ 57,70; PcvCO₂ 44,00; HCO₃⁻ 23,20; BE −2,00; ScvO₂ 86,30**. Intervalos de referência não foram importados e CO₂ total 24,60 ficou apenas como metadado visível na prévia.
+- Formato Radiometer ABL digitado, com rótulos `cHCO3-(P)c`, `ABEc`, `cNa+`, `cK+`, `cCa2+` e `cLac`, frações 21% e vírgulas decimais: parâmetros conhecidos mapeados corretamente; origem não específica exigiu seleção manual.
+- Criação de caso novo, segundo registro, persistência local (chave `fisiologia-perioperatoria-v04-cases`), conferência do tipo de amostra, exportação JSON e cálculos preexistentes testados.
+- Integração de leitura de foto testada com motor OCR simulado. O carregamento externo e a precisão real de OCR precisam ser validados no dispositivo do usuário.
+
+## Instalando a versão
+
+Os **cinco arquivos** da raiz do ZIP devem ficar juntos: `index.html`, `styles.css`, `script.js`, `importer.js` (novo) e `README.md`. **Não esqueça o `importer.js`**, que não existia nas versões anteriores. Continue sem bibliotecas de compilação nem servidor próprio; as entradas manual, texto e JSON funcionam sem dependências remotas. A aba Foto precisa de internet na primeira utilização.
+
+**Não publicar até completar os testes no Chrome.** O projeto é educacional e não substitui validação clínica.
+
+---
+
 # Fisiologia Perioperatória — v0.5.6
 
 ## Novo nesta versão
@@ -42,7 +78,7 @@ SBE = 0,9287 × [HCO₃⁻ − 24,4 + 14,83 × (pH − 7,40)], em mEq/L. Usar HC
 
 O armazenamento local e o formato de exportação/importação usam o mesmo identificador da v0.4. Casos existentes devem continuar disponíveis ao atualizar os arquivos no mesmo domínio. O novo campo I:E é texto (ex.: `1:2`); os demais são numéricos. Arquivos JSON da v0.4 continuam importáveis.
 
-**Antes da atualização, exporte o JSON dos seus casos.** Dados de exemplo/fictícios apenas: JSON não é criptografado. Teste localmente no navegador antes de publicar.
+Se os casos guardados no navegador forem importantes e você quiser preservar uma cópia independente, a exportação JSON é opcional e recomendada. Dados fictícios/desidentificados apenas: JSON não é criptografado. Teste localmente no navegador antes de publicar.
 
 ## Fontes científicas auxiliares
 
@@ -121,3 +157,13 @@ Carregue ou crie um caso. Entre com Hb 10 g/dL, SaO₂ 98%, PaO₂ 100 mmHg, Scv
 - Razão ΔPCO₂/C(a−cv)O₂ calculada somente dentro da aba Fórmula, rotulada como demonstração exploratória dimensional, nunca equiparada ao quociente respiratório RQ; não exibida se denominador ≤ 0,5 mL/dL ou dados ausentes.
 - Evidências: Dubin et al. 2020, Gutierrez et al. 2025 (epub 2024), Su et al. 2018 e Janotka & Ostadal 2021.
 - Preservados formatos do JSON, chave localStorage, cálculos e campos anteriores. Não validada para decisões clínicas.
+
+
+## Revisão v0.5.7.1 — melhoria do OCR após fotografia real
+
+- No modo Foto, opção de recorte automático central (ativada por padrão) e autocontraste da imagem antes do OCR. Pode ser desativado para outras posições de laudo. O recorte exclui na maioria dos recibos o cabeçalho/etiqueta, mas NÃO substitui a remoção de dados identificadores antes da fotografia.
+- O parser agora tolera rótulos deformados (pO,, pCO,, cHCO,(P)c, ABEç, sO,, cCa?, etc.) e ignora a seção de valores corrigidos pela temperatura.
+- Resultados OCR numericamente fora da faixa técnica (ex.: `974%`, `69 mmol/L`, `36 mmol/L`) NÃO são corrigidos automaticamente. São destacados com campo vazio e desmarcado, exigindo edição e seleção explícita.
+- Mesmo valores tecnicamente plausíveis podem estar errados (ex.: cálcio iônico `1,08` versus `1,03`). Conferência de cada valor com o laudo permanece obrigatória.
+- A opção Colar texto, importação JSON, campos manuais, dados já salvos e todas as fórmulas foram preservados.
+- Recorte e processamento OCR foram aferidos em fotografia Radiometer enviada pelo usuário com Tesseract local; a performance do Tesseract.js no navegador do usuário ainda precisa ser confirmada.

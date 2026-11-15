@@ -67,3 +67,42 @@ dialog:has(.pf-tabs){max-width:730px;max-height:min(88vh,850px);overflow-y:auto}
 .integrated-readout small{font-size:11px;display:block;color:#647b8c}
 .integrated-readout strong{font-size:21px;color:#193e55;display:block;margin-top:4px}
 @media(max-width:620px){.integrated-link{align-items:stretch;flex-direction:column}.integrated-readout{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* v0.5.7 — importador de gasometrias: todos os métodos no mesmo painel */
+#importDialog{max-width:780px;max-height:90vh;overflow-y:auto}
+#importDialog .import-body{padding:27px}
+.import-body h2{margin:8px 0 10px}
+.import-body h3{margin:6px 0 12px;color:#21465c;font-size:17px}
+.import-body p{font-size:13px;line-height:1.65;color:#516b7d}
+.import-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;background:#eff4f8;padding:5px;border-radius:11px;margin:20px 0}
+.import-tabs button{border:0;border-radius:8px;background:transparent;padding:11px 5px;font-size:13px;font-weight:700;color:#58788e;cursor:pointer}
+.import-tabs button.selected{background:white;color:#153d57;box-shadow:0 2px 8px #1a415a19}
+.import-pane[hidden],.import-review[hidden]{display:none}
+.import-pane textarea{width:100%;resize:vertical;min-height:160px;border:1px solid #cfdae3;border-radius:10px;font:13px/1.5 ui-monospace,Consolas,monospace;color:#153d57;padding:13px;margin:8px 0 12px;background:#f9fbfd}
+.import-pane input[type=file]{display:block;padding:12px;border:1px dashed #b0c5d5;border-radius:9px;background:#f8fafc;max-width:100%;margin:9px 0 13px}
+.import-label{display:block;font-size:12px;font-weight:750;color:#355a74;margin-top:12px}
+.import-status{font-size:12px;color:#346783;min-height:18px}
+.import-actions{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.import-prompt{overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.55 ui-monospace,Consolas,monospace;color:#21465c}
+.import-review{border-top:1px solid #dce7ee;margin-top:22px;padding-top:20px}
+.import-review-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.import-review-controls label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:750;color:#466b82}
+.import-review-controls select{width:100%}
+.import-preview{border:1px solid #dee8ef;border-radius:11px;overflow:hidden;margin-top:16px}
+.import-item{display:grid;grid-template-columns:24px minmax(140px,1.3fr) minmax(95px,.8fr) auto;align-items:center;gap:10px;padding:9px 13px;border-bottom:1px solid #edf1f5}
+.import-item:last-child{border-bottom:0}
+.import-item label{font-size:13px;font-weight:650;color:#21465c}
+.import-item input[type=number]{width:100%;border:1px solid #d1dfe7;border-radius:7px;padding:8px;color:#21465c;background:#fff;font-variant-numeric:tabular-nums}
+.import-item small{font-size:11px;color:#6b8192}
+.import-warnings{color:#856b32!important;font-size:12px!important}
+.import-confirm{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.55;color:#34546d;margin:17px 0}
+.import-confirm input{margin-top:3px;flex:none}
+.import-review .primary{width:100%;text-align:center}
+@media(max-width:580px){#importDialog .import-body{padding:22px 16px}.import-tabs button{font-size:11px;padding:10px 2px}.import-review-controls{grid-template-columns:1fr}.import-item{grid-template-columns:23px minmax(100px,1fr) minmax(78px,.7fr);gap:7px}.import-item small{grid-column:2/-1}.import-item{padding:9px 8px}}
+
+/* v0.5.7.1 — reforço de segurança na revisão fotográfica */
+.import-crop-choice{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#486b81;margin:10px 0 15px;line-height:1.5}
+.import-crop-choice input{margin-top:3px}
+.import-item.import-uncertain{background:#fff8ea}
+.import-item.import-uncertain label{color:#805b24}
+.import-item.import-uncertain input[type=number]{border-color:#d6b06a}

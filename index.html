@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Estudo de fisiologia perioperatória com casos, registros seriados e cálculos independentes."><title>Fisiologia Perioperatória | Plataforma Acadêmica</title><link rel="stylesheet" href="styles.css"></head>
-<body><header class="topbar"><div class="brand"><span class="mark">φ</span><div><strong>Fisiologia Perioperatória</strong><small>Aprender · Calcular · Acompanhar</small></div></div><span class="pill">Protótipo educacional v0.5.6</span></header>
+<body><header class="topbar"><div class="brand"><span class="mark">φ</span><div><strong>Fisiologia Perioperatória</strong><small>Aprender · Calcular · Acompanhar</small></div></div><span class="pill">Protótipo educacional v0.5.7.1</span></header>
 <main>
 <section class="intro"><div><span class="eyebrow">PLATAFORMA DE FISIOLOGIA</span><h1>Casos e evolução</h1><p>Crie um caso fictício ou desidentificado, registre diferentes momentos e acompanhe a evolução de gasometria, ventilação e hemodinâmica. Cada cálculo funciona com os dados disponíveis.</p></div></section>
 <div class="notice">Uso exclusivamente educacional; não validado para decisões assistenciais. Não insira dados identificáveis de pacientes. Os casos ficam apenas neste navegador e podem ser perdidos ao limpar seus dados: exporte cópias de segurança.</div>
-<section class="case-toolbar panel"><div class="case-pick"><label for="caseSelect">Caso ativo</label><select id="caseSelect" aria-label="Caso ativo"></select></div><button id="newCase" class="primary">+ Novo caso</button><button id="loadExample" class="secondary">Carregar exemplo</button><button id="exportCases" class="secondary">Exportar JSON</button><button id="importCases" class="secondary">Importar JSON</button><input type="file" accept=".json,application/json" id="importFile" hidden><button id="deleteCase" class="secondary danger">Excluir caso</button><span id="saveStatus" aria-live="polite"></span></section>
+<section class="case-toolbar panel"><div class="case-pick"><label for="caseSelect">Caso ativo</label><select id="caseSelect" aria-label="Caso ativo"></select></div><button id="newCase" class="primary">+ Novo caso</button><button id="loadExample" class="secondary">Carregar exemplo</button><button id="openGasImport" class="primary" type="button">Importar gasometria</button><button id="exportCases" class="secondary">Exportar JSON</button><button id="importCases" class="secondary">Importar JSON</button><input type="file" accept=".json,application/json" id="importFile" hidden><button id="deleteCase" class="secondary danger">Excluir caso</button><span id="saveStatus" aria-live="polite"></span></section>
 <section id="caseArea" hidden><section class="panel case-profile"><div class="section-heading"><div><span class="eyebrow">INFORMAÇÕES GERAIS</span><h2>Dados do caso</h2></div><p class="subtle">Campos opcionais, sem informações identificáveis.</p></div><div class="profile-fields" id="profileFields"></div></section>
 <section class="panel records-panel"><div class="section-heading"><div><span class="eyebrow">LINHA DO TEMPO</span><h2>Registros do caso</h2></div><button class="primary" id="addRecord">+ Novo registro</button></div><div class="record-tabs" id="recordTabs" aria-label="Registros"></div><div class="record-toolbar"><label>Momento do registro <input id="recordTime" type="datetime-local"></label><label>Observação breve <input id="recordNote" type="text" maxlength="180" placeholder="Ex.: após ajuste ventilatório"></label><button id="duplicateRecord" class="secondary">Duplicar registro</button><button id="deleteRecord" class="secondary danger">Excluir registro</button></div></section>
 <section class="inputs" id="inputPanels">
@@ -46,4 +46,68 @@
 <section class="notes panel"><h2>Entender as medidas</h2><p>As fichas de <strong>P/F</strong>, <strong>ΔPCO₂</strong>, <strong>ΔpH</strong>, <strong>CaO₂</strong>, <strong>CcvO₂</strong>, <strong>CaO₂−CcvO₂</strong>, <strong>extração central estimada</strong>, <strong>Base Excess</strong>, <strong>Henderson–Hasselbalch</strong>, <strong>Stewart</strong> e a <strong>integração dos índices</strong> explicam fórmulas, premissas e limitações. A ficha de <strong>ΔpH</strong> distingue a diferença medida da estimativa de pH arterial pela gasometria venosa central; estimativas não substituem medidas arteriais nem alimentam outros cálculos. Só mostramos resultados calculáveis com os dados presentes.</p></section></section>
 <section id="emptyArea" class="panel"><h2>Comece por um caso</h2><p>Crie um caso novo ou carregue o exemplo didático. Você poderá acrescentar quantos registros quiser e exportar o histórico em JSON.</p></section>
 </main><dialog id="infoDialog"><div class="dialog-body"><button id="closeDialog" class="close" aria-label="Fechar">×</button><span class="eyebrow">FICHA DA VARIÁVEL</span><h2 id="dialogTitle"></h2><div id="dialogContent"></div></div></dialog>
-<footer>Projeto acadêmico independente · Sem cadastro ou envio de dados para servidores · Uso educacional</footer><script src="script.js" defer></script></body></html>
+
+<dialog id="importDialog" aria-labelledby="importDialogTitle">
+  <div class="dialog-body import-body">
+    <button id="closeImportDialog" class="close" type="button" aria-label="Fechar importador">×</button>
+    <span class="eyebrow">PREENCHIMENTO ASSISTIDO</span>
+    <h2 id="importDialogTitle">Importar gasometria</h2>
+    <p class="subtle">Revise a amostra e cada resultado antes de incluir no caso. Nenhuma leitura automática substitui a conferência do laudo.</p>
+    <div class="import-tabs" role="tablist" aria-label="Métodos de entrada">
+      <button type="button" class="selected" data-import-tab="manual" role="tab" aria-selected="true">Manual</button>
+      <button type="button" data-import-tab="text" role="tab" aria-selected="false">Colar texto</button>
+      <button type="button" data-import-tab="photo" role="tab" aria-selected="false">Foto</button>
+      <button type="button" data-import-tab="json" role="tab" aria-selected="false">JSON + IA</button>
+    </div>
+    <section data-import-pane="manual" class="import-pane">
+      <h3>Preenchimento manual</h3>
+      <p>O modo que você já conhece permanece intacto. Abra um caso e informe os parâmetros nos painéis arterial, venoso central e acidobásico.</p>
+      <button class="secondary" type="button" id="goManualFields">Ir para os campos</button>
+    </section>
+    <section data-import-pane="text" class="import-pane" hidden>
+      <h3>Colar o laudo do laboratório</h3>
+      <p>Cole o resultado completo; o programa separa resultados dos intervalos de referência. Processamento no navegador, sem envio para um servidor.</p>
+      <label for="importRawText" class="import-label">Texto do laudo (sem dados identificáveis)</label>
+      <textarea id="importRawText" rows="8" spellcheck="false" placeholder="GASOMETRIA VENOSA CENTRAL
+pH : 7.34 7,33 A 7,43
+PO2 : 57.70 mmHg 30 A 50 mmHg
+pCO2 : 44.00 mmHg 38 A 50 mmHg
+EXCESSO DE BASE: -2.00 mmol/L -3 A 3 mmol/L"></textarea>
+      <button type="button" class="primary" id="analyzeLabText">Analisar texto</button>
+    </section>
+    <section data-import-pane="photo" class="import-pane" hidden>
+      <h3>Foto de gasometria · OCR</h3>
+      <p>Selecione uma fotografia <strong>sem nome, etiqueta ou código de paciente</strong>. O OCR roda no navegador; na primeira execução precisa baixar o motor e os idiomas pela internet. A imagem não é enviada a um serviço de análise.</p>
+      <label for="importImage" class="import-label">Fotografia (JPG, PNG ou WEBP, até 10 MB)</label>
+      <input id="importImage" type="file" accept="image/png,image/jpeg,image/webp" />
+      <label class="import-crop-choice"><input type="checkbox" id="importCropCenter" checked> Priorizar a área central da foto (recomendado para recibos Radiometer)</label>
+      <button type="button" class="primary" id="recognizeImage">Reconhecer texto da foto</button>
+      <p id="importOCRStatus" class="import-status" role="status" aria-live="polite"></p>
+      <p class="hint">A leitura de números aparentemente plausíveis também pode estar errada. Compare todos os valores com a imagem. Se o laudo estiver deslocado para a borda, desmarque o recorte central e tente de novo.</p>
+    </section>
+    <section data-import-pane="json" class="import-pane" hidden>
+      <h3>JSON gerado por uma IA</h3>
+      <p>Envie uma imagem ou laudo <strong>anonimizado</strong> à IA de sua preferência, forneça a instrução abaixo e peça o arquivo JSON. O próprio site já sabe importar esse formato.</p>
+      <div class="import-actions"><button type="button" class="secondary" id="copyAIPrompt">Copiar instrução para IA</button><button type="button" class="primary" id="importJsonFromGuide">Selecionar JSON</button></div>
+      <details class="optional-panel"><summary>Ver instrução completa</summary><pre id="aiPromptPreview" class="import-prompt"></pre></details>
+      <p id="importPromptStatus" class="import-status" aria-live="polite"></p>
+    </section>
+    <section id="importReview" class="import-review" hidden>
+      <h3>Conferência antes de preencher</h3>
+      <p id="importAnalysisSummary" class="hint"></p>
+      <div class="import-review-controls">
+        <label for="importSampleType">Origem confirmada da amostra
+          <select id="importSampleType"><option value="">Selecione a origem...</option><option value="arterial">Arterial</option><option value="venous">Venosa central (CVC)</option></select>
+        </label>
+        <label for="importDestination">Onde salvar
+          <select id="importDestination"><option value="new_record">Novo registro no caso ativo</option><option value="current_record">Preencher registro atual</option><option value="new_case">Criar caso novo</option></select>
+        </label>
+      </div>
+      <div id="importPreview" class="import-preview"></div>
+      <p id="importWarnings" class="import-warnings"></p>
+      <label class="import-confirm"><input type="checkbox" id="importConfirmSample"> Conferi os valores e confirmei a origem da amostra no laudo ou na coleta.</label>
+      <button type="button" class="primary" id="applyLabImport">Preencher registro com os valores selecionados</button>
+    </section>
+  </div>
+</dialog>
+<footer>Projeto acadêmico independente · Sem cadastro ou envio de dados para servidores · Uso educacional</footer><script src="script.js" defer></script><script src="importer.js" defer></script></body></html>
