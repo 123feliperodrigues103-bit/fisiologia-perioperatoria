@@ -36,3 +36,23 @@ dialog:has(.pf-tabs){max-width:730px;max-height:min(88vh,850px);overflow-y:auto}
 #metricCards .hint{grid-column:1/-1}
 @media(max-width:800px){.optional-panel .fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:570px){.optional-panel .fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* v0.5.1 — eletrólitos à vista, compensação por hipótese selecionada */
+.acid-sections{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:16px}
+.acid-block{border:1px solid #e0e8ef;border-radius:12px;padding:18px;background:#fff;min-width:0}
+.acid-block h3{margin:0 0 8px;font-size:16px;color:#21465c}
+.acid-block .hint{margin:0 0 14px;line-height:1.55}
+.acid-block .optional-panel .hint{margin:12px 0 0}
+.acid-block .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.acid-block .optional-panel .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.disorder-label{font-size:12px;display:block;font-weight:700;color:#587085;margin:14px 0 5px}
+#primaryDisorder{width:100%;max-width:100%}
+.compensation-summary{background:#f6f9fb;border:1px solid #e1eaf1;border-radius:11px;padding:14px;margin-top:13px;line-height:1.5;min-height:74px;font-size:13px;color:#405c70}
+.comp-kicker{display:block;font-size:11px;font-weight:700;color:#617c90;text-transform:uppercase;letter-spacing:.05em}
+.comp-value{display:block;font-size:24px;margin:4px 0;color:#153d57;font-variant-numeric:tabular-nums}
+.comp-value small{font-size:12px;font-weight:500}
+.comp-range{display:block}
+.comp-line{margin:8px 0 0;font-size:12px}
+.comp-foot{margin:10px 0 0;font-size:12px;color:#647d8d}
+@media(max-width:900px){.acid-sections{grid-template-columns:1fr}}
+@media(max-width:570px){.acid-block{padding:14px}}
