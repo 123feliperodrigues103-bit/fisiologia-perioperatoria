@@ -106,3 +106,182 @@ dialog:has(.pf-tabs){max-width:730px;max-height:min(88vh,850px);overflow-y:auto}
 .import-item.import-uncertain{background:#fff8ea}
 .import-item.import-uncertain label{color:#805b24}
 .import-item.import-uncertain input[type=number]{border-color:#d6b06a}
+
+/* v0.5.8 — faixas orientativas com destaque proporcional ao contexto */
+.field .field-reference{display:block;font-size:10px;line-height:1.35;color:#8393a1;margin-top:2px}
+.field.reference-out input{border-color:#d59752;background:#fff9f0;box-shadow:inset 3px 0 #d59752}
+.field.reference-out .field-reference{color:#96541b;font-weight:700}
+.field .field-help{align-self:flex-start;font-size:11px;color:#286a8e;padding:3px 0;margin:0;border:0;background:transparent;font-weight:650;text-align:left}
+.field .field-help:hover{text-decoration:underline}
+.reference-summary{margin:0 0 16px;border:1px solid #edcfa6;border-left:3px solid #d39545;background:#fffaf2;color:#805222;border-radius:8px;padding:12px 15px;display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 13px}
+.reference-summary[hidden]{display:none}
+.reference-summary strong{font-size:13px}
+.reference-summary span{font-size:12px}
+.reference-summary small{font-size:11px;color:#8a7456;flex-basis:100%}
+.metric-reference-out{border-color:#e5c59e;background:linear-gradient(180deg,#fffaf4 0%,#fff 50%)}
+.metric-reference-out .number{color:#94541f}
+.metric-warning,.table-alert,.legend-alert{font-size:11px;font-weight:800;display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#f5e1bd;color:#965514;vertical-align:middle;margin-left:4px}
+.metric-ref{display:block;font-size:10px;line-height:1.45;color:#8c6d45;margin:6px 0}
+.metric-reference-out .metric-ref{font-weight:700;color:#985a2a}
+.compare-reading{display:inline-flex;align-items:center;justify-content:flex-end;gap:3px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:48px}
+.trend{display:inline-grid;place-items:center;min-width:21px;height:21px;padding:0 2px;border-radius:6px;color:#246d9d;background:#e6f2fa;font-size:16px;font-weight:800;line-height:1}
+.trend.down{color:#356c9d;background:#e9f2fc}
+.trend-legend{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#678196;font-size:11px;margin:8px 0 15px}
+.trend-example{font-weight:800;color:#246d9d;background:#e6f2fa;border-radius:4px;padding:1px 5px}
+.chart-reference{margin:-5px 0 13px!important;color:#537e82}
+.comparison table th{font-weight:600}
+.comparison table tbody th{font-size:12px;color:#32556a;text-align:left;border-bottom:1px solid #edf1f5;position:sticky;left:0;background:white;z-index:1;min-width:190px;padding:11px 8px}
+.comparison table td{min-width:94px;text-align:right}
+.comparison .optional-panel{margin-top:16px}
+.comparison .optional-panel summary{font-size:13px;font-weight:700;color:#376b86}
+.comparison .optional-panel .table-wrap{margin-top:12px}
+@media(max-width:570px){.reference-summary{padding:10px}.comparison table tbody th{min-width:145px}}
+
+/* v0.5.9 — primeiro a evolução individual; referências recolhidas e neutras */
+#validation{color:#71889b;font-weight:500}
+.temporal-focus{margin:4px 0 20px}
+.temporal-intro{font-size:13px;color:#667f91;background:#f6f9fb;padding:12px 14px;border-radius:10px;margin:0 0 14px;line-height:1.5}
+.temporal-intro strong{color:#214f6a}
+.temporal-heading{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+.temporal-heading strong{font-size:14px;color:#1d4f6e}
+.temporal-heading span{font-size:11px;color:#70889c}
+.temporal-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.temporal-tile{background:#f7fafc;border:1px solid #e6edf2;border-radius:11px;padding:12px;min-width:0}
+.temporal-label{display:block;color:#56748a;font-size:12px;font-weight:700;line-height:1.3}
+.temporal-reading{display:block;color:#1c4862;font-size:20px;margin:6px 0 10px;font-variant-numeric:tabular-nums}
+.temporal-reading small{font-size:11px;color:#7890a2;font-weight:400}
+.temporal-deltas{display:flex;gap:5px 12px;flex-wrap:wrap}
+.delta-line{font-size:10px;display:inline-flex;align-items:baseline;gap:4px;white-space:nowrap;font-variant-numeric:tabular-nums;color:#75899a}
+.delta-line .delta-name{color:#71889a;font-weight:600}
+.delta-line .delta-number{font-size:11px;font-weight:750;color:#327aa5}
+.delta-line.stable .delta-number,.delta-line.unknown .delta-number{color:#879aa9}
+.compare-reading{display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:110px;line-height:1.25}
+.compare-reading>strong{font-size:13px;color:#234a64;font-weight:750}
+.cell-deltas{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.baseline-label{font-size:10px;color:#899cad}
+.comparison table td{min-width:136px;vertical-align:top}
+.comparison table thead th:first-child{position:sticky;left:0;background:#fff;z-index:2}
+.legend-change{font-size:10px;font-weight:750;color:#2f739c;border:1px solid #d4e5ef;background:#f0f7fb;border-radius:5px;padding:3px 5px}
+.trend-legend{margin:9px 0 14px;gap:6px 9px;line-height:1.5}
+.chart-reference{color:#72889a!important;font-size:11px}
+.reference-library{margin-top:17px;padding:15px 20px!important;border-color:#e7edf2!important;background:#fcfdfe}
+.reference-library>summary{cursor:pointer;color:#728799;font-size:12px;font-weight:650;list-style-position:inside}
+.reference-library>summary:hover{color:#296d95}
+.reference-library[open]{padding-bottom:20px!important}
+.reference-intro{font-size:12px;line-height:1.55;color:#657f92;margin:15px 0}
+.reference-intro a,.reference-entry a{color:#387c9f}
+.reference-group{padding:8px 0}
+.reference-group h3{font-size:12px;color:#3b637c;letter-spacing:.03em;margin:4px 0 8px}
+.reference-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px}
+.reference-entry{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid #edf1f4;padding:6px 0}
+.reference-entry strong{display:block;font-size:11px;color:#46687f;font-weight:650}
+.reference-entry small{display:block;font-size:10px;color:#7c8fa0;margin-top:2px;line-height:1.5}
+.reference-entry>a{font-size:10px;white-space:nowrap;text-decoration:none}
+.reference-entry>a:hover{text-decoration:underline}
+@media(max-width:800px){.temporal-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:570px){.temporal-tiles,.reference-rows{grid-template-columns:1fr}.temporal-heading{align-items:flex-start}.comparison table td{min-width:127px}.reference-library{padding:15px!important}}
+
+/* v0.6.0 · Case-centric navigation, modular workspaces and intentional visual hierarchy */
+:root{--ink:#15364d;--navy:#133d56;--teal:#0c827a;--muted:#6d8397;--line:#e2eaf0}
+body{background:#f5f8fb;color:#19374d}
+.topbar{padding-top:14px;padding-bottom:14px;border-bottom:1px solid #e3eaf0;box-shadow:0 1px 7px rgba(18,57,82,.022)}
+.topbar .mark{background:linear-gradient(135deg,#174d62,#0b756f);box-shadow:0 6px 18px #117b732b}
+.brand strong{font-size:15px;letter-spacing:-.02em}.brand small{letter-spacing:.02em}
+.topbar .pill{border-color:#d3e4e7;background:#f2faf9;color:#4e7a7c;font-weight:700}
+main{max-width:1200px;padding-top:25px}
+.intro{background:linear-gradient(115deg,#133c55 0%,#134a5f 61%,#116a68 120%);border-radius:20px;padding:32px 37px;min-height:240px;display:flex;justify-content:space-between;align-items:center;margin:0 0 13px;box-shadow:0 14px 35px #18496313;overflow:hidden;position:relative}
+.intro::after{content:'';position:absolute;width:390px;height:390px;border:1px solid #ffffff18;border-radius:50%;right:-155px;top:-230px;box-shadow:0 0 0 55px #ffffff05,0 0 0 110px #ffffff03;pointer-events:none}
+.intro .eyebrow{color:#81d8d1}
+.intro h1{color:white;font-weight:770;font-size:clamp(29px,4vw,45px);line-height:1.09;margin:12px 0 12px;letter-spacing:-.045em}
+.intro h1 span{color:#a8dedc}
+.intro p{color:#d7e9ef;font-size:13.5px;line-height:1.7;max-width:550px}
+.hero-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:19px}.hero-chips span{font-size:10px;font-weight:750;color:#d0ebe9;background:#ffffff14;border:1px solid #ffffff23;padding:6px 10px;border-radius:99px}
+.intro-aside{min-width:245px;text-align:center;background:#ffffff11;border:1px solid #ffffff24;border-radius:16px;padding:23px 17px;z-index:1;backdrop-filter:blur(2px)}
+.aside-label{display:block;color:#a7cfda;font-size:10px;letter-spacing:.13em;font-weight:700}.aside-main{font-size:30px;font-weight:760;color:#f8ffff;white-space:nowrap;margin:14px 0}.aside-main span{color:#72c9c1}.aside-main sub{font-size:15px}.aside-foot{color:#a7cfd4;font-size:11px}
+.notice{border-left:0;background:#eaf3f5;color:#4b7080;font-size:12px;padding:12px 18px;border:1px solid #dcebef;border-radius:11px;margin:0 0 18px}.notice strong{color:#2d6274}
+.panel{border-color:#e0e9ef;box-shadow:0 4px 20px #1b527107;border-radius:15px}
+.primary{background:#135a69;border-color:#135a69}.primary:hover{background:#0a7176}.secondary{color:#315e77;border-color:#d2e1ea}
+.case-toolbar{display:flex;align-items:center;gap:18px;margin-bottom:9px;padding:18px 22px}
+.case-toolbar .workspace-caption{min-width:210px}.workspace-caption h2{font-size:19px;margin:4px 0 0;color:#204963}
+.case-toolbar .case-pick{min-width:210px;flex:1}.case-pick label{color:#6b8191;font-size:11px}
+.case-toolbar #saveStatus{max-width:130px;line-height:1.4}
+.example-library{background:#fff;border:1px solid #e4ebf0;border-radius:12px;margin-bottom:17px;color:#3e657b}
+.example-library summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 17px;gap:15px;font-size:12px;list-style:none}
+.example-library summary::-webkit-details-marker{display:none}.example-library summary>span:first-child{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.example-library summary strong{font-size:12px;color:#365f76}.example-library small{font-size:11px;color:#8a9ead}.example-symbol{font-size:20px;color:#6c9ea7}
+.library-count{border-radius:20px;background:#f3f8fa;padding:5px 9px;font-size:10px;color:#61849b;white-space:nowrap}.library-inside{border-top:1px solid #edf2f5;padding:14px 18px 18px}.library-inside p{font-size:12px;margin:0 0 12px}
+.case-overview{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:1px solid #e2eaf0;border-radius:14px;padding:15px 19px;margin-bottom:16px}
+.case-overview h2{font-size:19px;color:#204b64;margin:3px 0 5px;letter-spacing:-.02em}.kind-label{font-size:10px;color:#558384;font-weight:700;background:#eaf7f5;border-radius:100px;padding:3px 9px}
+.small-delete{font-size:11px;color:#a65b5b;padding:9px 11px}
+.module-nav{margin:0 0 15px}.module-heading{margin:0 0 12px}.module-heading h2{font-size:21px}
+.module-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.module-card{background:#fff;border:1px solid #e0e9ef;border-radius:14px;padding:18px 15px;display:flex;gap:12px;text-align:left;align-items:flex-start;transition:border-color .15s,box-shadow .15s,transform .15s;min-width:0;position:relative}
+.module-card:hover{transform:translateY(-1px);border-color:#9fc8c9}.module-card.selected{border-color:#0a8784;background:linear-gradient(160deg,#f1fbfa,#fff);box-shadow:inset 0 3px 0 #0e8c89,0 5px 18px #105f6616}
+.module-icon{flex:0 0 39px;width:39px;height:39px;border-radius:12px;background:#eff5f8;color:#3f8392;display:grid;place-items:center;font-weight:800;font-size:21px;line-height:1}
+.module-card.selected .module-icon{background:#daf3ef;color:#08817b}
+.module-detail{min-width:0;display:block;flex:1}.module-detail strong{display:block;color:#214b64;font-size:13px;margin:3px 0 5px;line-height:1.3}.module-detail small{color:#8294a2;font-size:11px;line-height:1.5;display:block}
+.module-state{position:absolute;right:12px;bottom:10px;font-size:9px;border-radius:50px;padding:4px 7px;font-weight:750}
+.module-state.live{color:#1c796f;background:#e4f5f0}.module-state.early{color:#728b9b;background:#f0f4f7}
+.case-profile{margin-bottom:14px;padding:0 20px}.case-profile summary{display:flex;justify-content:space-between;align-items:center;list-style:none;cursor:pointer;padding:15px 0}.case-profile summary::-webkit-details-marker{display:none}
+.case-profile summary strong{display:block;font-size:14px;color:#3c627b;margin-top:3px}.case-profile .hint-inline{font-size:11px;color:#8a9dab}.case-profile .profile-fields{margin:5px 0 21px}
+.records-panel{margin-bottom:18px}.records-panel h2{font-size:19px}.record-tab.selected{background:#115c6c;border-color:#115c6c}.record-tab{min-width:115px}
+.inputs{display:block}.module-content[hidden]{display:none!important}.module-content-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:5px 0 14px}.module-content-head h2{margin:4px 0 4px;font-size:21px;color:#204b64}.module-content-head p{font-size:12px;margin:0;line-height:1.6}
+.module-input-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.module-input-grid.one-column{grid-template-columns:1fr}.module-input-grid>.panel{min-width:0}.module-input-grid .acid-panel{grid-column:1/-1;background:#fff}
+.results{margin-top:23px}.results .section-heading h2{font-size:21px}.metric-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.metric{min-height:110px;background:#fff}.metric .number{color:#1a5870}
+.potassium-panel{margin-top:15px;border-color:#dcebe9}.potassium-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.potassium-head h2{color:#21556b;font-size:20px;margin:4px 0 5px}.potassium-head p{font-size:12px;margin:0}.study-tag{font-size:10px;color:#647b8a;background:#eff5f6;border-radius:99px;padding:6px 9px;white-space:nowrap}
+.potassium-values{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 11px}.potassium-reading{background:#f5faf9;border:1px solid #e1eeec;border-radius:11px;padding:14px;min-width:0}.potassium-reading>small{color:#5f828a;font-weight:700;font-size:11px}.potassium-reading>strong{display:block;color:#20556e;font-size:24px;margin:5px 0 8px;font-variant-numeric:tabular-nums}.potassium-reading>strong span{font-size:11px;font-weight:500;color:#8099a4}.potassium-reading>div{display:flex;gap:5px 12px;flex-wrap:wrap}.potassium-caveat{color:#657e8d;font-size:11px;margin:5px 0 0;line-height:1.7}.potassium-science{background:#fcfefe}.science-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}.science-columns h3{font-size:13px;color:#21566f}.science-columns p{font-size:12px}.reference-foot{font-size:11px!important}.reference-foot a{color:#237d89}
+.json-tools{margin-top:20px;padding:16px 20px}.json-section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.json-section-heading h2{font-size:15px;margin:3px 0}.json-section-heading p{font-size:11px;margin:0}.json-tools .text-link{background:none;border:0;font-size:11px;color:#317d8b;font-weight:750;white-space:nowrap}
+.json-tool-grid[hidden]{display:none}.json-tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:17px;padding-top:17px;border-top:1px solid #e8eef2}.json-tool-grid article{border:1px solid #e6edf2;border-radius:11px;background:#fafcfd;padding:16px;position:relative}.json-tool-grid h3{font-size:14px;margin:0 0 5px;color:#2e6078}.json-tool-grid p{font-size:12px;margin:0 0 14px}.json-tool-grid .mini-symbol{float:right;background:#e5f3f4;border-radius:9px;padding:3px 8px;font-size:19px;color:#3a8b91}
+.empty-onboarding{padding:12px 0 20px}.onboarding-heading{margin-bottom:13px}.onboarding-heading h2{font-size:22px;margin:4px 0 0}.onboarding-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.onboarding-card{background:#fff;border:1px solid #dee9ef;border-radius:17px;padding:24px;min-height:247px;display:flex;flex-direction:column;align-items:flex-start;box-shadow:0 4px 20px #0a476509}.onboarding-card .onboarding-visual{font-size:25px;color:#128783;background:#eaf8f5;width:43px;height:43px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px}.onboarding-card h3{margin:5px 0 6px;font-size:18px;color:#254f66}.onboarding-card p{font-size:12px;flex:1;margin:0 0 17px}.onboarding-card .primary,.onboarding-card .secondary{align-self:flex-start}.onboarding-didactic .onboarding-visual{background:#f0f5f9;color:#5f91aa}
+@media(max-width:930px){.intro-aside{min-width:190px}.module-card{flex-wrap:wrap;padding-bottom:29px}.module-icon{width:34px;height:34px;flex-basis:34px}.case-toolbar{flex-wrap:wrap}.case-toolbar .workspace-caption{min-width:160px}}
+@media(max-width:740px){.intro{padding:26px 23px;align-items:flex-start}.intro-aside{display:none}.module-cards{grid-template-columns:1fr;gap:8px}.module-card{flex-wrap:nowrap;align-items:center;padding:12px 13px 20px}.module-state{right:12px;bottom:4px}.module-input-grid{grid-template-columns:1fr}.module-input-grid>.acid-panel{grid-column:auto}.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.case-toolbar .workspace-caption{width:100%}.case-toolbar .case-pick{flex:1}.module-heading{align-items:flex-start}.potassium-head{flex-wrap:wrap}}
+@media(max-width:570px){main{padding:15px 13px 34px}.intro{border-radius:16px;padding:25px 21px;min-height:0}.intro h1{font-size:31px}.intro p{font-size:12px}.hero-chips span{font-size:9px}.case-toolbar{align-items:stretch;padding:15px}.case-toolbar .case-pick{flex-basis:100%}.toolbar-actions{width:100%}.toolbar-actions button{width:100%}.case-toolbar #saveStatus{max-width:none}.example-library summary{align-items:flex-start}.example-library small{display:block}.library-count{font-size:9px}.case-overview{align-items:flex-start;flex-direction:column}.small-delete{align-self:flex-end}.module-heading h2{font-size:18px}.module-detail strong{font-size:12px}.module-detail small{font-size:10px}.metric-grid{grid-template-columns:1fr}.potassium-values{grid-template-columns:1fr}.science-columns,.onboarding-grid,.json-tool-grid{grid-template-columns:1fr}.json-section-heading{align-items:flex-start;flex-direction:column}.json-tools{padding:15px}.json-tools .text-link{padding:5px 0}.case-profile summary .hint-inline{font-size:10px}.module-content-head{align-items:stretch;flex-direction:column}.module-content-head>button{align-self:flex-start}}
+
+/* v0.6.0 · prioritise longitudinal comparison above derived indices */
+.example-library[hidden],.integrated-link[hidden]{display:none!important}
+.calculation-drawer{background:#fff;border:1px solid #e0e9ee;border-radius:15px;padding:0;margin:18px 0 0;box-shadow:0 4px 18px #0d456407}
+.calculation-drawer>summary{display:flex;justify-content:space-between;align-items:center;gap:15px;cursor:pointer;padding:19px 22px;list-style:none}
+.calculation-drawer>summary::-webkit-details-marker{display:none}
+.calculation-drawer>summary strong{font-size:15px;display:block;margin:3px 0;color:#234e68}
+.calculation-drawer>summary small{font-size:11px;color:#7891a1;display:block}
+.calculation-drawer .drawer-chevron{font-size:22px;color:#5c8fa0}
+.calculation-drawer[open] .drawer-chevron{transform:rotate(180deg)}
+.calculation-content{padding:3px 20px 23px;border-top:1px solid #eaf0f4}
+.calculation-content>.section-heading{margin-top:18px}
+.calculation-drawer .metric-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.notes{padding:15px 20px}.notes>summary{font-size:12px;color:#728799;cursor:pointer;font-weight:650}
+.comparison{margin-top:23px}.comparison .section-heading{margin-bottom:14px}
+@media(max-width:740px){.calculation-drawer .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:570px){.calculation-drawer .metric-grid{grid-template-columns:1fr}.calculation-content{padding:3px 14px 20px}}
+
+/* v0.6.1 · Potássio na própria ficha da variável, sem painel redundante */
+.table-parameter-link{background:transparent;border:0;color:#236f8a;font-weight:750;padding:1px 0;text-align:left;font-size:inherit;text-decoration:underline;text-decoration-color:#a9cad8;text-underline-offset:3px}
+.table-parameter-link:hover,.field-help.k-open:hover{color:#14566d}
+.k-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.k-two>div{background:#f6f9fb;border:1px solid #e2ebf1;border-radius:11px;padding:13px}
+.k-two h4,.pf-tab-content h4{color:#204e66;margin:12px 0 5px;font-size:14px}
+.k-two h4{margin-top:0}.k-two p{font-size:12px;margin:0}
+.k-trend{background:#ecf4f8;color:#234f68!important;border-radius:10px;padding:12px}
+.k-didactic{border-left:3px solid #8eacbc;padding:11px 13px;background:#f5f8fa;font-size:12px!important;margin:15px 0!important}
+.k-calc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) auto;gap:9px;align-items:end;margin:15px 0}
+.k-calc-grid label{font-size:11px;color:#42677e;font-weight:700}
+.k-calc-grid input{width:100%;display:block;margin-top:5px;border:1px solid #d7e5eb;border-radius:8px;padding:10px;background:#fff}
+.k-calc-result{background:#f7f9fb;border-radius:8px;padding:11px;font-size:12px!important}
+@media(max-width:570px){.k-two{grid-template-columns:1fr}.k-calc-grid{grid-template-columns:1fr 1fr}.k-calc-grid button{grid-column:1 / -1}}
+
+.k-metabolic-warning{background:#fff8ed;color:#705129!important;border-left:3px solid #c99953;padding:11px 13px;border-radius:7px;font-size:12px!important}
+
+/* v0.6.2 · Calculadoras opt-in dentro da ficha K⁺, sem inputs ponderais de cálcio */
+.k-extra{background:#f8fafb;border:1px solid #dfe9ef;border-radius:10px;padding:12px 14px;margin:15px 0}
+.k-extra>summary{font-size:13px;cursor:pointer;font-weight:700;color:#285b74}
+.k-extra>p{font-size:12px}.k-opt-in{display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:#31566b;margin:10px 0}
+.k-opt-in input{accent-color:#357b95;margin-top:3px}
+@media(max-width:570px){.k-calc-grid{grid-template-columns:1fr 1fr}.k-calc-grid button{grid-column:1/-1}}
+
+/* v0.6.4 · clicabilidade da glicemia e conversão farmacêutica KCl documentada */
+.k-pharm-highlight{border-radius:10px;border:1px solid #cfe2ed;background:#eef6fa;padding:13px 14px;color:#1d566e!important;font-size:13px!important;line-height:1.65}
+.k-pharm-highlight strong{font-size:15px;color:#15546f}
+.glucose-big-result{font-size:20px!important;color:#236f83!important;font-weight:800;letter-spacing:-.3px;margin:9px 0!important;font-variant-numeric:tabular-nums}
+
+/* v0.6.4: tabela educacional do UpToDate dentro da ficha de glicemia */
+.glucose-table-wrap{overflow-x:auto;margin:12px 0}.glucose-example-table{width:100%;min-width:320px;table-layout:auto;border-collapse:collapse}.glucose-example-table th,.glucose-example-table td{font-size:12px;line-height:1.5;padding:9px 10px;white-space:normal;vertical-align:top}.glucose-example-table th{background:#edf4f8;color:#25475f}.glucose-example-table th:last-child,.glucose-example-table td:last-child{text-align:right}.pf-tab-content .glucose-example-table{font-variant-numeric:tabular-nums}

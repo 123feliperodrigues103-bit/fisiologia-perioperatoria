@@ -11,15 +11,15 @@
   fio2:['FiO₂','%',21,100],na:['Sódio','mmol/L',80,200],k:['Potássio','mmol/L',0.1,15],
   cl:['Cloreto','mmol/L',50,160],lactate:['Lactato','mmol/L',0,35],
   caion:['Cálcio ionizado','mmol/L',0.1,4],mg:['Magnésio','mmol/L',0.1,6],
-  albumin:['Albumina','g/dL',0,8],phosphate:['Fosfato','mmol/L',0,12]
+  albumin:['Albumina','g/dL',0,8],phosphate:['Fosfato','mmol/L',0,12],glucose:['Glicose','mg/dL',0,1500]
  };
  const toField={
   arterial:{ph:'aph',po2:'apo2',pco2:'apco2',hco3:'hco3',be:'be',so2:'aso2',hb:'hb'},
   venous:{ph:'vph',po2:'vpo2',pco2:'vpco2',hco3:'vhco3',be:'bev',so2:'vso2',hb:'hbv'}
  };
- const extraLabels={tco2:'CO₂ total',glucose:'Glicose',hematocrit:'Hematócrito',cohb:'Carboxi-hemoglobina',methb:'Meta-hemoglobina',hhb:'Desoxi-hemoglobina'};
+ const extraLabels={tco2:'CO₂ total',hematocrit:'Hematócrito',cohb:'Carboxi-hemoglobina',methb:'Meta-hemoglobina',hhb:'Desoxi-hemoglobina'};
  let extracted=null;
- const promptTemplate=`Você receberá uma gasometria FICTÍCIA ou completamente ANONIMIZADA. Transcreva SOMENTE os valores do paciente que estejam legíveis. Não inclua nome, prontuário, data de nascimento, identificadores nem o texto integral do laudo. Não confunda valores de referência com resultados, horário do laudo com horário da coleta, nem gasometria venosa com arterial. Se a origem da amostra não for explícita, peça confirmação ANTES de criar JSON.\n\nResponda exclusivamente com um JSON válido (sem blocos Markdown) neste formato:\n{\n  "format":"fisiologia-perioperatoria-cases-v04",\n  "cases":[{\n    "id":"caso-importado-1",\n    "title":"Gasometria anonimizada",\n    "profile":{"age":null,"sex":"","height":null,"weight":null,"description":"Caso desidentificado"},\n    "records":[{\n      "id":"registro-1",\n      "time":"",\n      "note":"Valores transcritos e conferidos; origem da amostra confirmada",\n      "values":{}\n    }]\n  }]\n}\n\nPara gasometria ARTERIAL, use somente as chaves disponíveis: aph (pH), apo2 (PaO2 em mmHg), apco2 (PaCO2 em mmHg), aso2 (SaO2 %), hco3 (HCO3 mmol/L), be (BE de laudo mEq/L), hb (Hb g/dL), fio2 (FiO2 %).\nPara gasometria VENOSA CENTRAL, use: vph, vpo2, vpco2, vso2, vhco3, bev, hbv. A origem venosa deve ser CENTRAL, não simplesmente periférica.\nOutros campos compartilhados permitidos: na, k, cl, lactate, caion, mg, albumin, phosphate. Use números decimais com ponto no JSON e mantenha BE negativo. Se o resultado vier em unidades diferentes, só converta com regra explícita e verificada. Não inclua campos ausentes e não invente valores. Não presuma BE(B) ou BEecf se o laudo não especificar. Se houver múltiplas amostras, separe em registros distintos, preservando a origem correta de cada valor. Não inclua intervalos de referência em values.\n\nO arquivo será importado na plataforma Fisiologia Perioperatória; confira se é JSON puro e se o usuário confirmou a origem da amostra.`;
+ const promptTemplate=`Você receberá uma gasometria FICTÍCIA ou completamente ANONIMIZADA. Transcreva SOMENTE os valores do paciente que estejam legíveis. Não inclua nome, prontuário, data de nascimento, identificadores nem o texto integral do laudo. Não confunda valores de referência com resultados, horário do laudo com horário da coleta, nem gasometria venosa com arterial. Se a origem da amostra não for explícita, peça confirmação ANTES de criar JSON.\n\nResponda exclusivamente com um JSON válido (sem blocos Markdown) neste formato:\n{\n  "format":"fisiologia-perioperatoria-cases-v04",\n  "cases":[{\n    "id":"caso-importado-1",\n    "title":"Gasometria anonimizada",\n    "profile":{"age":null,"sex":"","height":null,"weight":null,"description":"Caso desidentificado"},\n    "records":[{\n      "id":"registro-1",\n      "time":"",\n      "note":"Valores transcritos e conferidos; origem da amostra confirmada",\n      "values":{}\n    }]\n  }]\n}\n\nPara gasometria ARTERIAL, use somente as chaves disponíveis: aph (pH), apo2 (PaO2 em mmHg), apco2 (PaCO2 em mmHg), aso2 (SaO2 %), hco3 (HCO3 mmol/L), be (BE de laudo mEq/L), hb (Hb g/dL), fio2 (FiO2 %).\nPara gasometria VENOSA CENTRAL, use: vph, vpo2, vpco2, vso2, vhco3, bev, hbv. A origem venosa deve ser CENTRAL, não simplesmente periférica.\nOutros campos compartilhados permitidos: na, k, cl, glucose (glicose em mg/dL), lactate, caion, mg, albumin, phosphate. Use números decimais com ponto no JSON e mantenha BE negativo. Se o resultado vier em unidades diferentes, só converta com regra explícita e verificada. Não inclua campos ausentes e não invente valores. Não presuma BE(B) ou BEecf se o laudo não especificar. Se houver múltiplas amostras, separe em registros distintos, preservando a origem correta de cada valor. Não inclua intervalos de referência em values.\n\nO arquivo será importado na plataforma Fisiologia Perioperatória; confira se é JSON puro e se o usuário confirmou a origem da amostra.`;
  $('aiPromptPreview').textContent=promptTemplate;
  function changeTab(tab){
   query('[data-import-tab]').forEach(b=>{const active=b.dataset.importTab===tab;b.classList.toggle('selected',active);b.setAttribute('aria-selected',String(active));});
@@ -96,6 +96,10 @@
     if(!Object.hasOwn(values,key)&&!Object.hasOwn(uncertain,key))uncertain[key]=m[2];
     continue;
    }
+   if(key==='glucose'&&/\bmmol\s*\/\s*l\b/i.test(line)){
+    invalid.push('Glicose apresentada em mmol/L: não importada automaticamente. Converta e confira no laudo antes de inserir em mg/dL.');
+    continue;
+   }
    if(key==='lactate'&&/mg\s*\/\s*d[lL]/i.test(line)){
     invalid.push('Lactato em mg/dL não foi importado: confira a unidade antes de preencher.');
     continue;
@@ -109,7 +113,7 @@
   }
   return {sample:sourceType(clipped),values,extras,invalid,ambiguous,uncertain};
  }
- function mappedKey(key,sample){return (toField[sample]&&toField[sample][key]) || (['fio2','na','k','cl','lactate','caion','mg','albumin','phosphate'].includes(key)?key:null);}
+ function mappedKey(key,sample){return (toField[sample]&&toField[sample][key]) || (['fio2','na','k','cl','lactate','caion','mg','albumin','phosphate','glucose'].includes(key)?key:null);}
  function showReview(parsed){
   extracted=parsed.sample==='mixed'?null:parsed;
   const keys=Object.keys(parsed.values),uncertainKeys=Object.keys(parsed.uncertain||{}).filter(k=>!keys.includes(k));
