@@ -128,7 +128,7 @@
    const wrapper=document.createElement('div');wrapper.className='import-item'+(unsure?' import-uncertain':'');wrapper.dataset.importKey=key;
    const selected=document.createElement('input');selected.type='checkbox';selected.checked=!unsure;selected.setAttribute('aria-label',`Incluir ${known[key][0]}`);selected.className='import-include';
    const name=document.createElement('label');name.textContent=known[key][0]+(unsure?' · conferir':'');
-   const num=document.createElement('input');num.type='number';num.step='any';num.value=unsure?'':String(parsed.values[key]);num.placeholder=unsure?`OCR: ${parsed.uncertain[key]}`:'';num.className='import-number';num.setAttribute('aria-label',`Valor revisado de ${known[key][0]}`);
+   const num=document.createElement('input');num.type='text';num.inputMode='decimal';num.autocomplete='off';num.spellcheck=false;num.value=unsure?'':String(parsed.values[key]);num.placeholder=unsure?`OCR: ${parsed.uncertain[key]}`:'';num.className='import-number';num.setAttribute('aria-label',`Valor revisado de ${known[key][0]}`);
    const unit=document.createElement('small');unit.textContent=known[key][1];wrapper.append(selected,name,num,unit);items.append(wrapper);
    // Para um valor duvidoso, só incluir após digitação explícita de um número plausível.
    if(unsure){num.addEventListener('input',()=>{if(num.value.trim())selected.checked=true;else selected.checked=false;});}
@@ -155,7 +155,7 @@
    const key=element.dataset.importKey,target=mappedKey(key,sample);
    if(!target)continue;
    const input=element.querySelector('.import-number');if(input.value.trim()===''){alert('Há um valor selecionado mas vazio. Preencha-o ou desmarque-o.');return;}
-   const num=Number(input.value),[,unit,min,max]=known[key];
+   const num=parseMedicalDecimal(input.value),[,unit,min,max]=known[key];
    if(!Number.isFinite(num)||num<min||num>max){alert(`${known[key][0]} fora dos limites técnicos aceitos (${min} a ${max} ${unit}).`);return;}
    values[target]=num;
   }

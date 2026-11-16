@@ -1,10 +1,161 @@
 "use strict";
 const STORAGE_KEY='fisiologia-perioperatoria-v04-cases';
 const EXAMPLE={
-  title:'Caso 001 — exemplo didático',profile:{age:null,sex:'',height:null,weight:null,description:'Dados fictícios/desidentificados para testar a plataforma.'},
-  records:[
-    {id:'ex1',time:'2026-11-12T09:03',note:'Momento inicial',values:{fio2:50,hb:13.4,aph:7.37,apo2:181.7,apco2:45.2,aso2:98.4,vph:7.34,vpo2:49.1,vpco2:51.6,vso2:78.5}},
-    {id:'ex2',time:'2026-11-12T13:32',note:'Momento posterior',values:{fio2:50,hb:13.2,aph:7.37,apo2:160.7,apco2:42.4,aso2:97.1,vph:7.34,vpo2:57.7,vpco2:44,vso2:86.3}}
+  "title": "Caso 001 — Cirurgia abdominal de grande porte",
+  "kind": "didactic",
+  "studyKind": "abdominal-major",
+  "profile": {
+    "age": null,
+    "sex": "masculino",
+    "height": null,
+    "weight": 80,
+    "description": "Caso didático de cirurgia abdominal de grande porte: pancreatectomia corpo-caudal e esplenectomia, anestesia geral e analgesia peridural, quatro gasometrias pareadas."
+  },
+  "records": [
+    {
+      "id": "ex1",
+      "time": "",
+      "relativeTime": "T0",
+      "elapsedHours": 0,
+      "phase": "Centro cirúrgico · início",
+      "note": "Início do procedimento, FiO₂ 50%. K⁺ 2,9 mmol/L; reposição de 10 mL de KCl após a coleta.",
+      "values": {
+        "fio2": 50,
+        "hb": 13.4,
+        "aph": 7.37,
+        "apo2": 181.7,
+        "apco2": 45.2,
+        "aso2": 98.4,
+        "hco3": 25.5,
+        "be": 0.4,
+        "hbv": 13.4,
+        "vph": 7.34,
+        "vpo2": 49.1,
+        "vpco2": 51.6,
+        "vso2": 78.5,
+        "vhco3": 26.9,
+        "bev": 0.9,
+        "na": 140,
+        "k": 2.9,
+        "cl": 105,
+        "glucose": 152,
+        "lactate": 1.0,
+        "caion": 1.14,
+        "albumin": 4.0,
+        "phosphate": 1.1,
+        "mg": 0.85,
+        "pb": 720,
+        "rq": 0.8
+      }
+    },
+    {
+      "id": "ex2",
+      "time": "",
+      "relativeTime": "+2 h",
+      "elapsedHours": 2.03,
+      "phase": "Centro cirúrgico · intermediário",
+      "note": "Sob anestesia geral e ventilação mecânica, FiO₂ 50%; K⁺ 3,2 mmol/L após a primeira reposição de KCl.",
+      "values": {
+        "fio2": 50,
+        "hb": 12.9,
+        "aph": 7.39,
+        "apo2": 145.0,
+        "apco2": 41.4,
+        "aso2": 99.1,
+        "hco3": 24.2,
+        "be": -0.3,
+        "hbv": 12.9,
+        "vph": 7.35,
+        "vpo2": 51.6,
+        "vpco2": 47.6,
+        "vso2": 82.1,
+        "vhco3": 25.8,
+        "bev": 0.3,
+        "na": 141,
+        "k": 3.2,
+        "cl": 106,
+        "glucose": 199,
+        "lactate": 1.4,
+        "caion": 1.13,
+        "albumin": 4.0,
+        "phosphate": 1.1,
+        "mg": 0.85,
+        "pb": 720,
+        "rq": 0.8
+      }
+    },
+    {
+      "id": "ex3",
+      "time": "",
+      "relativeTime": "+4h30",
+      "elapsedHours": 4.5,
+      "phase": "Centro cirúrgico · final",
+      "note": "Clampeamento portal de cerca de 30 min; coleta 15 min após desclampeamento. K⁺ 2,9 mmol/L; reposição de 10 mL de KCl e reforço da peridural em seguida.",
+      "values": {
+        "fio2": 50,
+        "hb": 13.2,
+        "aph": 7.37,
+        "apo2": 160.7,
+        "apco2": 42.4,
+        "aso2": 97.1,
+        "hco3": 23.8,
+        "be": -1.1,
+        "hbv": 13.2,
+        "vph": 7.34,
+        "vpo2": 57.7,
+        "vpco2": 44.0,
+        "vso2": 86.3,
+        "vhco3": 23.2,
+        "bev": -2.0,
+        "na": 143,
+        "k": 2.9,
+        "cl": 108,
+        "glucose": 210,
+        "lactate": 1.9,
+        "caion": 1.13,
+        "albumin": 4.0,
+        "phosphate": 1.1,
+        "mg": 0.85,
+        "pb": 720,
+        "rq": 0.8
+      }
+    },
+    {
+      "id": "ex4",
+      "time": "",
+      "relativeTime": "+10h50",
+      "elapsedHours": 10.85,
+      "phase": "UTI · extubado",
+      "note": "UTI: extubado em ar ambiente, FiO₂ 21%; noradrenalina em baixa dose e cateter peridural mantido.",
+      "values": {
+        "fio2": 21,
+        "hb": 12.5,
+        "aph": 7.34,
+        "apo2": 77.3,
+        "apco2": 43.2,
+        "aso2": 93.1,
+        "hco3": 22.5,
+        "be": -2.8,
+        "hbv": 12.5,
+        "vph": 7.29,
+        "vpo2": 44.9,
+        "vpco2": 54.9,
+        "vso2": 71.9,
+        "vhco3": 25.6,
+        "bev": -1.4,
+        "na": 143,
+        "k": 2.9,
+        "cl": 108,
+        "glucose": 180,
+        "lactate": 3.6,
+        "caion": 1.12,
+        "albumin": 4.0,
+        "phosphate": 1.1,
+        "mg": 0.85,
+        "pb": 720,
+        "rq": 0.8
+      }
+    }
   ]
 };
 const profileGroups=[['age','Idade','anos'],['sex','Sexo para PBW',''],['height','Altura','cm'],['weight','Peso real','kg'],['description','Descrição didática','']];
@@ -91,6 +242,21 @@ function validCase(c){return !!c&&typeof c==='object'&&typeof c.id==='string'&&t
 let cases=readCases(), activeId=cases[0]?.id||null, recordId=cases[0]?.records[0]?.id||null;
 let activeModule='gas';
 const isDidactic=c=>c?.kind==='didactic'||/^caso 001.*exemplo didático/i.test(c?.title||'');
+function momentText(c,r,i){
+ if(c?.studyKind==='abdominal-major'&&r?.relativeTime)return r.relativeTime;
+ return i===0?'T0':`T${i}`;
+}
+function momentSubtext(c,r){
+ if(c?.studyKind==='abdominal-major'&&r?.phase)return r.phase;
+ return r?.time?r.time.replace('T',' '):'Sem data';
+}
+function parseMedicalDecimal(value){
+ const raw=String(value??'').trim();
+ if(!raw||!/^[-+]?(?:\d+(?:[.,]\d*)?|[.,]\d+)$/.test(raw))return null;
+ const parsed=Number(raw.replace(',','.'));
+ return Number.isFinite(parsed)?parsed:null;
+}
+
 function activeCase(){return cases.find(c=>c.id===activeId)||null;}
 function currentRecord(){const c=activeCase();return c?.records.find(r=>r.id===recordId)||c?.records[0]||null;}
 function fmt(x,places=1){return Number.isFinite(x)?x.toLocaleString('pt-BR',{minimumFractionDigits:places,maximumFractionDigits:places}):'—';}
@@ -182,7 +348,7 @@ function compute(d,p){
  return out;
 }
 function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(cases));document.getElementById('saveStatus').textContent='Salvo neste navegador';}catch{document.getElementById('saveStatus').textContent='Não foi possível salvar. Exporte seus casos.';}}
-function profileHtml(c){return profileGroups.map(([key,label,unit])=>{const v=c.profile[key]??'';let control;if(key==='sex')control=`<select data-profile="${key}"><option value="">Não informado</option><option value="masculino" ${v==='masculino'?'selected':''}>Masculino (PBW)</option><option value="feminino" ${v==='feminino'?'selected':''}>Feminino (PBW)</option></select>`;else control=`<input data-profile="${key}" ${key==='description'?'type="text" maxlength="180"':`type="number" step="any" min="0"`} value="${esc(v)}" placeholder="Opcional">`;return `<div class="profile-field"><label>${label}${unit?' ('+unit+')':''}</label>${control}</div>`;}).join('');}
+function profileHtml(c){return profileGroups.map(([key,label,unit])=>{const v=c.profile[key]??'';let control;if(key==='sex')control=`<select data-profile="${key}"><option value="">Não informado</option><option value="masculino" ${v==='masculino'?'selected':''}>Masculino (PBW)</option><option value="feminino" ${v==='feminino'?'selected':''}>Feminino (PBW)</option></select>`;else control=`<input data-profile="${key}" ${key==='description'?'type="text" maxlength="180"':`type="text" inputmode="decimal" autocomplete="off" spellcheck="false"`} value="${esc(v)}" placeholder="Opcional">`;return `<div class="profile-field"><label>${label}${unit?' ('+unit+')':''}</label>${control}</div>`;}).join('');}
 // v0.5.9: referências adultas de consulta, recolhidas; nenhuma cor/alarme automático por faixa.
 // Não sinalizar valores dependentes da intervenção (FiO₂, PaO₂, PAM, DC, ScvO₂) como "anormais" por regra universal.
 const REFERENCE_NOTES={
@@ -249,17 +415,20 @@ function renderReferenceCatalog(){
 function fieldsHtml(r,id){return fields[id].map(([key,label,unit])=>{
  const x=r.values[key];const isText=key==='ieratio';
  const phHelp=['aph','vph'].includes(key)?`<button type="button" class="field-help" data-info="ph">Entender pH e H⁺ ↗</button>`:key==='k'?`<button type="button" class="field-help k-open" data-info="k">Entender K⁺ e correção ↗</button>`:key==='glucose'?`<button type="button" class="field-help k-open" data-info="glucose">Entender glicemia ↗</button>`:'';
- return `<div class="field" data-field-wrap="${key}"><label for="f_${key}">${label} <span class="unit">${unit}</span></label><input id="f_${key}" data-field="${key}" type="${isText?'text':'number'}" ${isText?'maxlength="12"':'step="any" inputmode="decimal"'} value="${x===null||x===undefined?'':esc(x)}" placeholder="${isText?'1:2':'—'}">${phHelp}</div>`;
+ return `<div class="field" data-field-wrap="${key}"><label for="f_${key}">${label} <span class="unit">${unit}</span></label><input id="f_${key}" data-field="${key}" type="text" ${isText?'maxlength="12"':'inputmode="decimal" autocomplete="off" spellcheck="false"'} value="${x===null||x===undefined?'':esc(x)}" placeholder="${isText?'1:2':'—'}">${phHelp}</div>`;
 }).join('');}
 function renderLayout(){const c=activeCase();document.getElementById('caseSelect').innerHTML=cases.length?cases.map(x=>`<option value="${esc(x.id)}" ${x.id===activeId?'selected':''}>${isDidactic(x)?'◇ Exemplo · ':''}${esc(x.title)}</option>`).join(''):'<option value="">Nenhum caso salvo</option>';
  document.getElementById('exampleLibrary').hidden=!c;
  document.getElementById('activeCaseTitle').textContent=c?.title||'—';document.getElementById('activeCaseKind').textContent=c?(isDidactic(c)?'◇ Exemplo didático · cópia editável':'Caso criado por você'):'Nenhum caso';
+ const study=document.getElementById('studyBrief');if(study)study.hidden=c?.studyKind!=='abdominal-major';
  applyModuleVisibility();
  document.getElementById('caseArea').hidden=!c;document.getElementById('emptyArea').hidden=!!c;
  if(!c)return;const r=currentRecord();recordId=r?.id||null;
  document.getElementById('profileFields').innerHTML=profileHtml(c);
- document.getElementById('recordTabs').innerHTML=c.records.map((x,i)=>`<button type="button" class="record-tab ${x.id===recordId?'selected':''}" data-record="${esc(x.id)}"><b>${i===0?'T0 · inicial':'T'+i}</b><small>${esc(x.time?x.time.replace('T',' '):'Sem data')}</small></button>`).join('');
- document.getElementById('recordTime').value=r?.time||'';document.getElementById('recordNote').value=r?.note||'';
+ document.getElementById('recordTabs').innerHTML=c.records.map((x,i)=>`<button type="button" class="record-tab ${x.id===recordId?'selected':''}" data-record="${esc(x.id)}"><b>${esc(momentText(c,x,i))}</b><small>${esc(momentSubtext(c,x))}</small></button>`).join('');
+ document.getElementById('recordTime').value=r?.time||'';
+ document.getElementById('recordTime').closest('label').hidden=Boolean(r?.relativeTime&&c.studyKind==='abdominal-major');
+ document.getElementById('recordNote').value=r?.note||'';
  for(const id of Object.keys(fields))document.getElementById(id).innerHTML=fieldsHtml(r,id);
  document.getElementById('primaryDisorder').value=DISORDERS.includes(r?.values.primaryDisorder)?r.values.primaryDisorder:'';
  renderReferenceCatalog();
@@ -354,14 +523,14 @@ function renderTemporalFocus(cols,computed,available){
   const previous=timeValue(m,cols[index-1],computed[index-1]);
   return `<article class="temporal-tile"><span class="temporal-label">${esc(m.label)}</span><strong class="temporal-reading">${fmt(value,m.places)} <small>${esc(m.unit)}</small></strong><div class="temporal-deltas">${deltaLine('Δ T0',value,baseline,m)}${deltaLine('Δ ant.',value,previous,m)}</div></article>`;
  }).join('');
- node.innerHTML=`<div class="temporal-heading"><strong>T${index} · registro selecionado</strong><span>${esc(cols[index].time?cols[index].time.replace('T',' '):'Sem data')} · diferenças absolutas</span></div>${tiles?`<div class="temporal-tiles">${tiles}</div>`:'<p class="temporal-intro">Preencha dados no registro selecionado para acompanhar suas mudanças.</p>'}`;
+ node.innerHTML=`<div class="temporal-heading"><strong>${esc(momentText(activeCase(),cols[index],index))} · registro selecionado</strong><span>${esc(momentSubtext(activeCase(),cols[index]))} · diferenças absolutas</span></div>${tiles?`<div class="temporal-tiles">${tiles}</div>`:'<p class="temporal-intro">Preencha dados no registro selecionado para acompanhar suas mudanças.</p>'}`;
 }
 function renderEvolution(){const c=activeCase();if(!c)return;
  const cols=c.records.slice(0,50),computed=cols.map(r=>compute(r.values,c.profile));
  const available=EVOLUTION_METRICS.filter(m=>cols.some((r,i)=>Number.isFinite(timeValue(m,r,computed[i]))));
  const first=available.filter(m=>EVOLUTION_MAIN.includes(m.key));
  const other=available.filter(m=>!EVOLUTION_MAIN.includes(m.key));
- const head=`<tr><th>Parâmetro</th>${cols.map((r,i)=>`<th>${i===0?'T0 · inicial':'T'+i}${r.time?' · '+esc(r.time.replace('T',' ')):''}</th>`).join('')}</tr>`;
+ const head=`<tr><th>Parâmetro</th>${cols.map((r,i)=>`<th>${esc(momentText(c,r,i))}${r.relativeTime?'':r.time?' · '+esc(r.time.replace('T',' ')):''}</th>`).join('')}</tr>`;
  document.getElementById('compareHead').innerHTML=head;
  document.getElementById('compareBody').innerHTML=first.map(m=>evolutionRow(m,cols,computed)).join('')||'<tr><td colspan="2">Preencha dados dos registros para comparar.</td></tr>';
  document.getElementById('compareExtraHead').innerHTML=head;
@@ -379,13 +548,16 @@ function renderEvolution(){const c=activeCase();if(!c)return;
  if(!chosen){canvas.innerHTML='<div class="empty-chart">Preencha pelo menos dois registros com dados suficientes para visualizar uma variável evolutiva.</div>';refNote.textContent='';return;}
  const points=cols.map((r,i)=>({i,v:timeValue(chosen,r,computed[i])})).filter(p=>Number.isFinite(p.v));
  const baselineValue=timeValue(chosen,cols[0],computed[0]);
- refNote.textContent=Number.isFinite(baselineValue)?'Linha tracejada = valor de T0, não faixa de normalidade. Os pontos mostram medições do próprio paciente.':'T0 não contém esta medida; o gráfico mostra a evolução disponível, sem linha de base individual.';
+ refNote.textContent=c.studyKind==='abdominal-major'?'Linha tracejada = T0. Tempos no gráfico proporcionais aos intervalos do caso.':Number.isFinite(baselineValue)?'Linha tracejada = valor de T0, não faixa de normalidade. Os pontos mostram registros do caso.':'T0 não contém esta medida; o gráfico mostra a evolução disponível, sem linha de base individual.';
  const w=720,h=205,left=55,right=20,top=20,bottom=42;
  let min=Math.min(...points.map(p=>p.v)),max=Math.max(...points.map(p=>p.v));const pad=Math.max((max-min)*.18,Math.pow(10,-chosen.places)*2,Math.abs(max)*.002);min-=pad;max+=pad;
- const x=i=>left+(w-left-right)*(cols.length===1?0:i/(cols.length-1));const y=v=>top+(h-top-bottom)*(max-v)/(max-min);
+ const elapsed=cols.map(r=>Number.isFinite(r.elapsedHours)?r.elapsedHours:null);
+ const useElapsed=elapsed.every((hour,i)=>hour!==null&&hour>=0&&(i===0||hour>=elapsed[i-1]))&&elapsed.at(-1)>0;
+ const x=i=>left+(w-left-right)*(cols.length===1?0:useElapsed?elapsed[i]/elapsed.at(-1):i/(cols.length-1));
+ const y=v=>top+(h-top-bottom)*(max-v)/(max-min);
  const line=points.map(p=>`${x(p.i)},${y(p.v)}`).join(' ');
  const baseLine=Number.isFinite(baselineValue)?`<line x1="${left}" y1="${y(baselineValue)}" x2="${w-right}" y2="${y(baselineValue)}" stroke="#96aaba" stroke-dasharray="6 5" stroke-width="1.5"/>`:'';
- canvas.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolução de ${esc(chosen.label)}, linha de base individual T0"><g fill="none" stroke="#dfe7ee">${[0,1,2,3,4].map(i=>`<line x1="${left}" y1="${top+(h-top-bottom)*i/4}" x2="${w-right}" y2="${top+(h-top-bottom)*i/4}"/>`).join('')}</g>${baseLine}<g font-size="11" fill="#718799">${[0,1,2,3,4].map(i=>`<text x="${left-8}" y="${top+(h-top-bottom)*i/4+4}" text-anchor="end">${fmt(max-(max-min)*i/4,Math.max(1,chosen.places))}</text>`).join('')}${cols.map((r,i)=>`<text x="${x(i)}" y="${h-15}" text-anchor="middle">T${i}</text>`).join('')}</g><polyline points="${line}" fill="none" stroke="#287da6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${points.map(p=>{const d=deltaValue(p.v,baselineValue,chosen.places);return `<circle cx="${x(p.i)}" cy="${y(p.v)}" r="4.5" fill="#287da6"><title>T${p.i}: ${fmt(p.v,chosen.places)} ${esc(chosen.unit)}${d?' · Δ T0 '+d.text:''}</title></circle>`;}).join('')}</svg>`;
+ canvas.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolução de ${esc(chosen.label)}, linha de base individual T0"><g fill="none" stroke="#dfe7ee">${[0,1,2,3,4].map(i=>`<line x1="${left}" y1="${top+(h-top-bottom)*i/4}" x2="${w-right}" y2="${top+(h-top-bottom)*i/4}"/>`).join('')}</g>${baseLine}<g font-size="11" fill="#718799">${[0,1,2,3,4].map(i=>`<text x="${left-8}" y="${top+(h-top-bottom)*i/4+4}" text-anchor="end">${fmt(max-(max-min)*i/4,Math.max(1,chosen.places))}</text>`).join('')}${cols.map((r,i)=>`<text x="${x(i)}" y="${h-15}" text-anchor="middle">${esc(momentText(c,r,i))}</text>`).join('')}</g><polyline points="${line}" fill="none" stroke="#287da6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${points.map(p=>{const d=deltaValue(p.v,baselineValue,chosen.places);return `<circle cx="${x(p.i)}" cy="${y(p.v)}" r="4.5" fill="#287da6"><title>${esc(momentText(c,cols[p.i],p.i))}: ${fmt(p.v,chosen.places)} ${esc(chosen.unit)}${d?' · Δ T0 '+d.text:''}</title></circle>`;}).join('')}</svg>`;
 }
 function info(key){const definition=definitions[key];if(!definition)return;const [title,description,equation,limit]=definition;document.getElementById('dialogTitle').textContent=title;const node=document.getElementById('dialogContent');node.replaceChildren();if(key==='k'||key==='glucose'||key==='ph'||key==='integracao'||key==='pf'||key==='dco2'||key==='cao2'||['cvo2','aav','eo2'].includes(key)||key==='dph'||key==='phest'||['hco3a','hco3v','hplusA','hplusV','sids','sida','side','sig','pco2exp','hco3exp'].includes(key)||['bea','bev','sbea','sbev'].includes(key)){
  const bar=document.createElement('div');bar.className='pf-tabs';bar.id='pfTabBar';bar.dataset.scienceKind=key==='k'?'k':key==='glucose'?'glucose':key==='ph'?'ph':['hco3a','hco3v','hplusA','hplusV'].includes(key)?'hh':(['sids','sida','side','sig'].includes(key)?'stewart':(['pco2exp','hco3exp'].includes(key)?'compensation':(['bea','bev','sbea','sbev'].includes(key)?'baseexcess':key)));bar.setAttribute('role','tablist');for(const t of (['k','glucose'].includes(key)?pfTabs.map(t=>({...t,label:t.id==='formula'?'Cálculos':t.id==='limites'?'Cuidados':t.label})):pfTabs)){const button=document.createElement('button');button.type='button';button.textContent=t.label;button.dataset.pfTab=t.id;button.setAttribute('role','tab');bar.appendChild(button);}const content=document.createElement('div');content.id='pfTabContent';content.className='pf-tab-content';node.append(bar,content);renderScienceTab('entender');
@@ -834,7 +1006,7 @@ function potassiumSciencePanel(tab){
  const caution='<p class="k-didactic"><strong>Uso exclusivamente educacional.</strong> Os dados da gasometria não estabelecem, isoladamente, mecanismo, urgência, prescrição nem via. ECG, sintomas, função renal, diurese, medicamentos, perdas e contexto clínico precisam ser conhecidos; considerar protocolo assistencial aplicável.</p>';
  const links={hyper:'https://www.uptodate.com/contents/treatment-and-prevention-of-hyperkalemia-in-adults',hypo:'https://www.uptodate.com/contents/clinical-manifestations-and-treatment-of-hypokalemia-in-adults',eval:'https://www.uptodate.com/contents/evaluation-of-the-adult-patient-with-hypokalemia',causes:'https://www.uptodate.com/contents/causes-of-hypokalemia-in-adults'};
  if(tab==='entender')return `<h3>Potássio — contexto deste momento</h3><p><strong>${status}.</strong> A concentração sérica não representa necessariamente o estoque corporal e deve ser interpretada com a velocidade da mudança.</p>${trend}<div class="k-two"><div><h4>Alteração do estoque corporal</h4><p>Perdas renais e gastrointestinais, retenção renal, diurese e excreção distal modificam a quantidade total de K⁺. Distúrbios persistentes podem coexistir com mudanças transcelulares.</p></div><div><h4>Redistribuição transcelular</h4><p>Insulina, estímulo β₂-adrenérgico, hiperosmolalidade e alterações ácido-base mudam rapidamente a concentração extracelular, sem quantificar o déficit ou excesso corporal.</p></div></div><p><strong>Variáveis concomitantes:</strong> glicemia ${fmt(gl,0)} mg/dL · pH arterial ${fmt(ph,2)} · Mg ${fmt(mg,2)} mmol/L. Dados ausentes não significam valores normais.</p>${metabolicCaution}${bicarbCaution}<h4>Raciocínio diferencial da hipocalemia</h4><p>Se a causa não for óbvia, combinar história, acidose ou alcalose e excreção urinária de K⁺ ajuda a diferenciar perdas renais, digestivas e redistribuição. K⁺ baixo com alcalose e perdas renais, por exemplo, não equivale a K⁺ baixo após insulina.</p><p>Hipomagnesemia pode sustentar perdas urinárias e dificultar a correção do K⁺. A hipocalemia por redistribuição pode apresentar <strong>hipercalemia de rebote</strong> após reposição.</p>${caution}`;
- if(tab==='formula')return `<h3>Cálculos e esquemas descritos nas fontes</h3><p>Os números seguintes são exemplos <strong>documentados</strong> para cenários específicos; não são doses calculadas para este paciente.</p><h4>Hipercalemia com repercussão cardíaca — cálcio intravenoso</h4><div class="k-two"><div><h4>Gluconato de cálcio</h4><p>UpToDate: <strong>1.000 mg IV</strong>, equivalentes a 10 mL da preparação a 10%, contendo cerca de <strong>4,6 mEq</strong> de cálcio elementar. Pode ser administrado em acesso periférico apropriado.</p></div><div><h4>Cloreto de cálcio</h4><p>UpToDate: <strong>500–1.000 mg IV</strong>, equivalentes a 5–10 mL a 10%, contendo cerca de <strong>6,8–13,6 mEq</strong> de cálcio elementar. Prefere-se acesso central ou veia profunda devido ao risco de lesão por extravasamento.</p></div></div><p class="k-didactic"><strong>Não são equivalentes por volume.</strong> O cloreto de cálcio contém aproximadamente três vezes mais cálcio elementar por mL a 10%. As diretrizes também diferem nas doses recomendadas de gluconato; verificar qual diretriz e cenário se aplicam. O cálcio antagoniza efeitos cardíacos, mas <strong>não reduz o K⁺</strong>. A fonte descreve administração monitorizada e eventual repetição conforme ECG.</p><h4>Hipercalemia — redistribuição com insulina</h4><p>No manejo de emergência, o UpToDate descreve <strong>10 unidades de insulina regular IV</strong> associadas a <strong>25 g de glicose</strong>; com glicemia ≥250 mg/dL, descreve insulina sem glicose inicial. Aponta risco de hipoglicemia tardia e monitorização glicêmica horária por 5–6 horas. A estratégia não elimina K⁺ do organismo.</p><h4>Hipocalemia — reposição descrita no UpToDate</h4><p>Em perdas de potássio com hipocalemia leve a moderada (3,0–3,4 mmol/L), quando há possibilidade de via enteral, o capítulo descreve <strong>10–20 mEq por dose oral, 2–4 vezes ao dia</strong>, conforme causa. Em hipocalemia grave ou sintomática, KCl IV pode ser necessário; a fonte descreve <strong>10–20 mEq/h para a maioria</strong>, com taxas mais altas somente em situações excepcionais ameaçadoras à vida, sob monitorização e condições apropriadas.</p><p><strong>Sal escolhido:</strong> KCl em geral; em hipocalemia com acidose metabólica, o UpToDate discute sais alcalinizantes de K⁺, conforme etiologia e disponibilidade. Uma gasometria não determina automaticamente o sal nem a via.</p><details class="k-extra"><summary>Estimar déficit corporal de K⁺ — somente em perdas crônicas, com ressalvas</summary><p>O UpToDate relata aproximadamente <strong>200–400 mEq de déficit para queda de 1 mmol/L</strong> de K⁺ na hipocalemia <em>crônica por perda corporal</em>. Isso é uma relação populacional, <strong>não uma dose de reposição</strong>, e não serve para CAD/EHH, paralisia periódica, redistribuição ou situações rapidamente mutáveis.</p><label class="k-opt-in"><input type="checkbox" id="kDeficitEligible"> Confirmo que o exercício representa perda corporal crônica, e não redistribuição ou cenário agudo</label><div class="k-calc-grid"><label>K⁺ habitual conhecido (mmol/L)<input id="kDeficitBaseline" type="number" min="2.0" max="6.5" step="0.1" inputmode="decimal" placeholder="Informar valor documentado"></label><button type="button" class="secondary" id="kDeficitButton">Estimar déficit teórico</button></div><p class="k-calc-result" id="kDeficitResult" aria-live="polite">Não há cálculo automático a partir da potassemia isolada.</p></details><details class="k-extra"><summary>Razão K⁺/creatinina urinária — dados externos à gasometria</summary><p>Se uma amostra de urina isolada tiver <strong>K⁺ em mEq/L</strong> e <strong>creatinina em mg/dL</strong>, a razão em mEq/g auxilia na avaliação de perdas renais. O UpToDate descreve valores &gt;13 mEq/g como sugestivos de excreção inadequada na hipocalemia, com exceções importantes.</p><div class="k-calc-grid"><label>K⁺ urinário (mEq/L)<input id="kUrineK" type="number" min="0" max="300" step="0.1" inputmode="decimal" placeholder="Ex.: 30"></label><label>Creatinina urinária (mg/dL)<input id="kUrineCr" type="number" min="0.1" max="1000" step="0.1" inputmode="decimal" placeholder="Ex.: 100"></label><button type="button" class="secondary" id="kUrineButton">Calcular razão</button></div><p class="k-calc-result" id="kUrineResult" aria-live="polite">As duas dosagens devem pertencer à mesma amostra urinária.</p></details><h4>KCl concentrado — conversão farmacêutica</h4><p class="k-pharm-highlight"><strong>KCl 19,1%: 2,56 mEq de K⁺ por mL</strong> (aproximadamente 2,5 mEq/mL). Uma apresentação frequente, não universal: confirmar rótulo e unidade. A quantidade de concentrado é diferente do volume final e da velocidade da bomba.</p><details class="k-extra"><summary>Converter mEq em mL de KCl 19,1% · apenas aritmética</summary><p>10 mEq = 3,9 mL; 15 mEq = 5,9 mL; 20 mEq = 7,8 mL. Esta ferramenta não seleciona a dose.</p><div class="k-calc-grid"><label>Quantidade definida (mEq)<input id="kConcentrateMeq" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" placeholder="Ex.: 15"></label><button type="button" class="secondary" id="kConcentrateButton">Converter em mL</button></div><p class="k-calc-result" id="kConcentrateResult" aria-live="polite">Não corresponde à dose total a administrar nem a velocidade de infusão.</p></details><p class="k-didactic">KCl concentrado exige diluição e administração controlada; nunca injetar o concentrado diretamente por via intravenosa. Conferir acesso, concentração final, bomba, monitorização e protocolo aplicável.</p><h4>Bicarbonato e potássio</h4><p>Seu efeito redutor de K⁺ na hipercalemia aguda é variável e não deve ser considerado monoterapia. O cálculo educacional de dose para <em>tratar acidemia</em> pertence à ficha ácido-base, após auditoria da fonte específica; não incluímos preparo ou diluição.</p>${caution}`;
+ if(tab==='formula')return `<h3>Cálculos e esquemas descritos nas fontes</h3><p>Os números seguintes são exemplos <strong>documentados</strong> para cenários específicos; não são doses calculadas para este paciente.</p><h4>Hipercalemia com repercussão cardíaca — cálcio intravenoso</h4><div class="k-two"><div><h4>Gluconato de cálcio</h4><p>UpToDate: <strong>1.000 mg IV</strong>, equivalentes a 10 mL da preparação a 10%, contendo cerca de <strong>4,6 mEq</strong> de cálcio elementar. Pode ser administrado em acesso periférico apropriado.</p></div><div><h4>Cloreto de cálcio</h4><p>UpToDate: <strong>500–1.000 mg IV</strong>, equivalentes a 5–10 mL a 10%, contendo cerca de <strong>6,8–13,6 mEq</strong> de cálcio elementar. Prefere-se acesso central ou veia profunda devido ao risco de lesão por extravasamento.</p></div></div><p class="k-didactic"><strong>Não são equivalentes por volume.</strong> O cloreto de cálcio contém aproximadamente três vezes mais cálcio elementar por mL a 10%. As diretrizes também diferem nas doses recomendadas de gluconato; verificar qual diretriz e cenário se aplicam. O cálcio antagoniza efeitos cardíacos, mas <strong>não reduz o K⁺</strong>. A fonte descreve administração monitorizada e eventual repetição conforme ECG.</p><h4>Hipercalemia — redistribuição com insulina</h4><p>No manejo de emergência, o UpToDate descreve <strong>10 unidades de insulina regular IV</strong> associadas a <strong>25 g de glicose</strong>; com glicemia ≥250 mg/dL, descreve insulina sem glicose inicial. Aponta risco de hipoglicemia tardia e monitorização glicêmica horária por 5–6 horas. A estratégia não elimina K⁺ do organismo.</p><h4>Hipocalemia — reposição descrita no UpToDate</h4><p>Em perdas de potássio com hipocalemia leve a moderada (3,0–3,4 mmol/L), quando há possibilidade de via enteral, o capítulo descreve <strong>10–20 mEq por dose oral, 2–4 vezes ao dia</strong>, conforme causa. Em hipocalemia grave ou sintomática, KCl IV pode ser necessário; a fonte descreve <strong>10–20 mEq/h para a maioria</strong>, com taxas mais altas somente em situações excepcionais ameaçadoras à vida, sob monitorização e condições apropriadas.</p><p><strong>Sal escolhido:</strong> KCl em geral; em hipocalemia com acidose metabólica, o UpToDate discute sais alcalinizantes de K⁺, conforme etiologia e disponibilidade. Uma gasometria não determina automaticamente o sal nem a via.</p><details class="k-extra"><summary>Estimar déficit corporal de K⁺ — somente em perdas crônicas, com ressalvas</summary><p>O UpToDate relata aproximadamente <strong>200–400 mEq de déficit para queda de 1 mmol/L</strong> de K⁺ na hipocalemia <em>crônica por perda corporal</em>. Isso é uma relação populacional, <strong>não uma dose de reposição</strong>, e não serve para CAD/EHH, paralisia periódica, redistribuição ou situações rapidamente mutáveis.</p><label class="k-opt-in"><input type="checkbox" id="kDeficitEligible"> Confirmo que o exercício representa perda corporal crônica, e não redistribuição ou cenário agudo</label><div class="k-calc-grid"><label>K⁺ habitual conhecido (mmol/L)<input id="kDeficitBaseline" type="text" inputmode="decimal" min="2.0" max="6.5" step="0.1" inputmode="decimal" placeholder="Informar valor documentado"></label><button type="button" class="secondary" id="kDeficitButton">Estimar déficit teórico</button></div><p class="k-calc-result" id="kDeficitResult" aria-live="polite">Não há cálculo automático a partir da potassemia isolada.</p></details><details class="k-extra"><summary>Razão K⁺/creatinina urinária — dados externos à gasometria</summary><p>Se uma amostra de urina isolada tiver <strong>K⁺ em mEq/L</strong> e <strong>creatinina em mg/dL</strong>, a razão em mEq/g auxilia na avaliação de perdas renais. O UpToDate descreve valores &gt;13 mEq/g como sugestivos de excreção inadequada na hipocalemia, com exceções importantes.</p><div class="k-calc-grid"><label>K⁺ urinário (mEq/L)<input id="kUrineK" type="text" inputmode="decimal" min="0" max="300" step="0.1" inputmode="decimal" placeholder="Ex.: 30"></label><label>Creatinina urinária (mg/dL)<input id="kUrineCr" type="text" inputmode="decimal" min="0.1" max="1000" step="0.1" inputmode="decimal" placeholder="Ex.: 100"></label><button type="button" class="secondary" id="kUrineButton">Calcular razão</button></div><p class="k-calc-result" id="kUrineResult" aria-live="polite">As duas dosagens devem pertencer à mesma amostra urinária.</p></details><h4>KCl concentrado — conversão farmacêutica</h4><p class="k-pharm-highlight"><strong>KCl 19,1%: 2,56 mEq de K⁺ por mL</strong> (aproximadamente 2,5 mEq/mL). Uma apresentação frequente, não universal: confirmar rótulo e unidade. A quantidade de concentrado é diferente do volume final e da velocidade da bomba.</p><details class="k-extra"><summary>Converter mEq em mL de KCl 19,1% · apenas aritmética</summary><p>10 mEq = 3,9 mL; 15 mEq = 5,9 mL; 20 mEq = 7,8 mL. Esta ferramenta não seleciona a dose.</p><div class="k-calc-grid"><label>Quantidade definida (mEq)<input id="kConcentrateMeq" type="text" inputmode="decimal" min="0.1" max="100" step="0.1" inputmode="decimal" placeholder="Ex.: 15"></label><button type="button" class="secondary" id="kConcentrateButton">Converter em mL</button></div><p class="k-calc-result" id="kConcentrateResult" aria-live="polite">Não corresponde à dose total a administrar nem a velocidade de infusão.</p></details><p class="k-didactic">KCl concentrado exige diluição e administração controlada; nunca injetar o concentrado diretamente por via intravenosa. Conferir acesso, concentração final, bomba, monitorização e protocolo aplicável.</p><h4>Bicarbonato e potássio</h4><p>Seu efeito redutor de K⁺ na hipercalemia aguda é variável e não deve ser considerado monoterapia. O cálculo educacional de dose para <em>tratar acidemia</em> pertence à ficha ácido-base, após auditoria da fonte específica; não incluímos preparo ou diluição.</p>${caution}`;
  if(tab==='limites')return `<h3>Precauções e limites da interpretação</h3><ul class="science-list"><li><strong>ECG:</strong> sua normalidade não exclui hipercalemia importante; o padrão eletrocardiográfico não progride de maneira confiável com a concentração. Na hipocalemia, considerar arritmias, ondas U, repolarização prolongada e condições predisponentes.</li><li><strong>Gluconato e cloreto de cálcio:</strong> ambos podem ser usados na estabilização de membrana em hipercalemia com indicação apropriada. Não são bioequivalentes em volumes iguais; atentar à via, monitorização e lesão tecidual por extravasamento.</li><li><strong>Potássio IV:</strong> velocidade, concentração e acesso são condições de segurança distintas. O UpToDate recomenda monitorização contínua do ECG em situações específicas, incluindo reposição IV &gt;10 mEq/h.</li><li><strong>Hipomagnesemia:</strong> pode provocar perda renal persistente de K⁺; sua avaliação é relevante desde o início, e não somente após tratamento fracassado.</li><li><strong>Redistribuição:</strong> após insulina, β₂-agonistas ou reversão de alcalemia, a potassemia pode mudar sem corresponder ao déficit corporal. Reposição indiscriminada pode ocasionar rebote.</li><li><strong>CAD/EHH:</strong> hiperglicemia isolada não estabelece diagnóstico. Na CAD/EHH confirmada, o consenso de 2024 e o algoritmo do UpToDate de anestesia utilizam K⁺ &lt;3,5 mmol/L para adiar insulina, enquanto o capítulo geral de hipocalemia ainda menciona &gt;3,3 mmol/L. Não misturar limiares sem identificar a fonte e o cenário.</li><li><strong>Bicarbonato:</strong> o benefício para reduzir K⁺ agudamente é limitado; acompanhar K⁺, pH, Ca²⁺ ionizado, produção de CO₂ e estado volêmico, sem automatizar indicação.</li><li><strong>Função renal e diurese:</strong> interferem no risco de hipercalemia por reposição e na capacidade de excreção. Na hipocalemia, K⁺ urinário isolado pode enganar; a razão K⁺/creatinina também apresenta limitações.</li><li><strong>Pós-operatório:</strong> o capítulo de hipercalemia do UpToDate especificamente orienta evitar poliestirenossulfonato de sódio pelo risco gastrointestinal.</li></ul>${metabolicCaution}${bicarbCaution}${caution}`;
  return `<h3>Referências auditadas</h3><ol class="science-list"><li><a href="${links.hyper}" target="_blank" rel="noopener noreferrer">Mount DB. <em>Treatment and prevention of hyperkalemia in adults</em></a>. UpToDate, versão 60.0, 03/11/2026. Seções: Calcium; Insulin with glucose; Sodium bicarbonate; Monitoring; Remove potassium from the body.</li><li><a href="${links.hypo}" target="_blank" rel="noopener noreferrer">Mount DB. <em>Clinical manifestations and treatment of hypokalemia in adults</em></a>. UpToDate, 10/08/2026. Seções: Hypomagnesemia and redistributive hypokalemia; Estimation of the potassium deficit; Mild to moderate hypokalemia; Intravenous potassium repletion.</li><li><a href="${links.eval}" target="_blank" rel="noopener noreferrer">Mount DB. <em>Evaluation of the adult patient with hypokalemia</em></a>. UpToDate, 28/07/2025. Seções: Assessment of urinary potassium excretion; Urine potassium-to-creatinine ratio; Assessment of acid-base status.</li><li><a href="${links.causes}" target="_blank" rel="noopener noreferrer">Mount DB. <em>Causes of hypokalemia in adults</em></a>. UpToDate, 02/10/2026. Seções: Increased entry into cells; Increased gastrointestinal losses; Increased urinary losses.</li><li><a href="https://www.uptodate.com/contents/anesthesia-for-patients-with-diabetes-mellitus-and-or-hyperglycemia" target="_blank" rel="noopener noreferrer">Abdelmalak e Sreedharan, UpToDate: anestesia em diabetes/hiperglicemia</a> (15/06/2026), algoritmo de emergência em CAD: K⁺ &lt;3,5 mmol/L antes de iniciar insulina. Diverge do limiar 3,3 mencionado no capítulo geral de hipocalemia.</li><li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11272983/" target="_blank" rel="noopener noreferrer">Consenso internacional de 2024 sobre crises hiperglicêmicas</a>: limiar de K⁺ &lt;3,5 mmol/L na CAD/EHH confirmada.</li><li><a href="https://guidelines.ukkidney.org/hyperkalaemia/6-summary-of-clinical-practice-guideline-for-hyperkalaemia/6-2-section-ii-hospital/" target="_blank" rel="noopener noreferrer">UK Kidney Association, 2026</a>: exemplo de divergência em dose de gluconato de cálcio para emergência hipercalêmica.</li></ol><p>Conteúdo resumido em linguagem original, com as fontes identificadas por tópico e seção. Diferentes recomendações podem refletir condições, população e diretriz distintas; nenhuma das fontes valida prescrição automática com uma gasometria isolada.</p>${caution}`;
 }
@@ -870,7 +1042,7 @@ function glucoseSciencePanel(tab){
 function runKConcentrateConversion(){
  const output=document.getElementById('kConcentrateResult');if(!output)return;
  const raw=document.getElementById('kConcentrateMeq')?.value.trim()||'';
- const amount=raw?Number(raw.replace(',','.')):NaN;
+ const amount=raw?parseMedicalDecimal(raw):NaN;
  if(!Number.isFinite(amount)||amount<=0||amount>100){output.textContent='Informe uma quantidade positiva de K⁺ em mEq para converter. A ferramenta não define a dose.';return;}
  output.textContent=`${fmt(amount,1)} mEq ÷ 2,56 mEq/mL = ${fmt(amount/2.56,1)} mL de KCl concentrado 19,1%. Este NÃO é o volume final nem a velocidade da bomba. A dose selecionada exige indicação clínica independente.`;
 }
@@ -879,7 +1051,7 @@ function runKDeficitEstimate(){
  if(!document.getElementById('kDeficitEligible')?.checked){output.textContent='Marque a condição de aplicabilidade para o exercício; não há cálculo para redistribuição ou causa indeterminada.';return;}
  const k=val(currentRecord()?.values||{},'k',0,15);
  const raw=document.getElementById('kDeficitBaseline')?.value?.trim()||'';
- const baseline=raw===''?NaN:Number(raw.replace(',','.'));
+ const baseline=raw===''?NaN:parseMedicalDecimal(raw);
  if(k===null||!(k<3.5)||!Number.isFinite(baseline)||baseline<=k||baseline>6.5){output.textContent='Informe K⁺ medido abaixo de 3,5 mmol/L e um valor habitual anterior documentado maior que o atual. Sem esses dados, não estimar.';return;}
  const difference=baseline-k;
  output.textContent=`Exercício populacional: redução de ${fmt(difference,1)} mmol/L em relação ao K⁺ habitual corresponderia, em perda crônica, a aproximadamente ${fmt(difference*200,0)}–${fmt(difference*400,0)} mEq de déficit corporal. NÃO representa a dose a infundir: redistribuição, perdas ativas, função renal e evolução alteram a resposta.`;
@@ -887,7 +1059,7 @@ function runKDeficitEstimate(){
 function runKUrineRatio(){
  const output=document.getElementById('kUrineResult');if(!output)return;
  const kraw=document.getElementById('kUrineK')?.value?.trim()||'', craw=document.getElementById('kUrineCr')?.value?.trim()||'';
- const ku=kraw===''?NaN:Number(kraw.replace(',','.')),cr=craw===''?NaN:Number(craw.replace(',','.'));
+ const ku=kraw===''?NaN:parseMedicalDecimal(kraw),cr=craw===''?NaN:parseMedicalDecimal(craw);
  if(!Number.isFinite(ku)||ku<0||ku>300||!Number.isFinite(cr)||cr<=0||cr>1000){output.textContent='Informe K⁺ urinário em mEq/L e creatinina urinária em mg/dL, na mesma amostra.';return;}
  const ratio=100*ku/cr;
  output.textContent=`Razão K⁺/creatinina urinária = ${fmt(ratio,1)} mEq/g de creatinina. ${ratio>13?'Acima de 13 mEq/g, pode sugerir perda renal inadequada na hipocalemia.':'Até 13 mEq/g pode ser compatível com conservação renal de K⁺.'} Não define a etiologia isoladamente; considerar efeito de diuréticos, volume urinário, ácido-base e momento da coleta.`;
@@ -919,7 +1091,20 @@ document.getElementById('deleteCase').onclick=()=>{const c=activeCase();if(!c||!
 document.getElementById('exportCases').onclick=()=>{const blob=new Blob([JSON.stringify({format:'fisiologia-perioperatoria-cases-v04',exportedAt:new Date().toISOString(),cases},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='fisiologia-perioperatoria-casos.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 document.getElementById('importCases').onclick=()=>document.getElementById('importFile').click();
 document.getElementById('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5e6)throw Error('Arquivo maior que 5 MB.');const raw=JSON.parse(await file.text());if(raw.format!=='fisiologia-perioperatoria-cases-v04'||!Array.isArray(raw.cases)||raw.cases.length>1000||!raw.cases.every(validCase))throw Error('Formato de arquivo inválido.');if(!confirm(`Importar ${raw.cases.length} caso(s)? Os novos casos serão adicionados aos existentes.`))return;for(const imported of raw.cases){const c=structuredClone(imported);c.id=newId();c.title=c.title.slice(0,100);c.kind=c.kind==='didactic'?'didactic':'case';c.records.forEach(r=>{r.id=newId();r.note=r.note.slice(0,180);r.time=r.time.slice(0,16);const filtered={};for(const k of [...Object.values(fields).flat().map(x=>x[0]),...legacyNumberKeys])if(typeof r.values[k]==='number'&&Number.isFinite(r.values[k]))filtered[k]=r.values[k];if(typeof r.values.ieratio==='string'&&r.values.ieratio.length<=12)filtered.ieratio=r.values.ieratio;if(DISORDERS.includes(r.values.primaryDisorder))filtered.primaryDisorder=r.values.primaryDisorder;r.values=filtered;});const p=c.profile;c.profile={age:val(p,'age',0,125),sex:['masculino','feminino'].includes(p.sex)?p.sex:'',height:val(p,'height',0,250),weight:val(p,'weight',0,500),description:String(p.description||'').slice(0,180)};cases.push(c);}activeId=cases.at(-1)?.id||null;recordId=activeCase()?.records[0]?.id||null;save();renderLayout();}catch(err){alert('Não foi possível importar: '+err.message);}finally{e.target.value='';}};
-document.addEventListener('input',e=>{const target=e.target;const r=currentRecord(),c=activeCase();if(!r||!c)return;if(target.matches('[data-field]')){const raw=target.value.trim().replace(',','.');r.values[target.dataset.field]=target.dataset.field==='ieratio'?(raw||null):(raw===''?null:Number(raw));update();}else if(target.matches('[data-profile]')&&target.tagName!=='SELECT'){const k=target.dataset.profile;const raw=target.value.trim().replace(',','.');c.profile[k]=k==='description'?target.value:(raw===''?null:Number(raw));update();}else if(target.id==='recordNote'){r.note=target.value;save();}});
+document.addEventListener('input',e=>{const target=e.target;const r=currentRecord(),c=activeCase();if(!r||!c)return;
+ if(target.matches('[data-field]')){
+  const isRatio=target.dataset.field==='ieratio', raw=target.value.trim();
+  const parsed=isRatio?(raw||null):parseMedicalDecimal(raw);
+  r.values[target.dataset.field]=parsed;
+  target.classList.toggle('medical-number-invalid',Boolean(raw)&&!isRatio&&parsed===null);
+  update();
+ }else if(target.matches('[data-profile]')&&target.tagName!=='SELECT'){
+  const k=target.dataset.profile, raw=target.value.trim();
+  const parsed=k==='description'?target.value:parseMedicalDecimal(raw);
+  c.profile[k]=parsed;target.classList.toggle('medical-number-invalid',Boolean(raw)&&k!=='description'&&parsed===null);
+  update();
+ }else if(target.id==='recordNote'){r.note=target.value;save();}
+});
 document.addEventListener('change',e=>{if(e.target.id==='primaryDisorder'){const r=currentRecord();if(r){r.values.primaryDisorder=DISORDERS.includes(e.target.value)?e.target.value:'';update();}}if(e.target.matches('[data-profile]')){const c=activeCase();if(c){c.profile[e.target.dataset.profile]=e.target.value;update();}}if(e.target.id==='recordTime'){const r=currentRecord();if(r){r.time=e.target.value;save();renderLayout();}}if(e.target.id==='chartMetric')renderEvolution();});
 document.addEventListener('click',e=>{const tab=e.target.closest('[data-record]');if(tab){recordId=tab.dataset.record;renderLayout();return;}if(e.target.closest('#kDeficitButton')){runKDeficitEstimate();return;}if(e.target.closest('#kUrineButton')){runKUrineRatio();return;}if(e.target.closest('#kConcentrateButton')){runKConcentrateConversion();return;}const scienceTab=e.target.closest('[data-pf-tab]');if(scienceTab){renderScienceTab(scienceTab.dataset.pfTab);return;}const card=e.target.closest('[data-info]');if(card)info(card.dataset.info);});
 document.getElementById('openIntegration').onclick=()=>info('integracao');
