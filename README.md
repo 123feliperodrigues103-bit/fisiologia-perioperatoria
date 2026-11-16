@@ -1,4 +1,4 @@
-# Fisiologia Perioperatória — v0.6.6
+# Fisiologia Perioperatória — v0.6.7
 
 **Candidata para teste local. O site publicado não foi alterado.**
 
@@ -41,3 +41,28 @@ Material para estudo. **Não validado para prescrição nem decisões assistenci
 ## Ajuste v0.6.6
 
 O Caso 001 passou a ser apresentado como um único cenário fictício coeso. Removidos o bloco **Como ler o exemplo** e as etiquetas **simulado**, **premissa**, **hemograma** e **relato** nos campos, incluindo cópias anteriormente salvas. Todos os valores e fórmulas foram preservados. As dosagens basais de albumina, fosfato e magnésio são explicitadas uma única vez na narrativa.
+
+## Correção v0.6.7 — importação de laudo copiado do computador
+
+O importador **Colar texto** agora aceita tanto o formato de tabela compactada em uma linha por parâmetro quanto o texto copiado da visualização de prontuário, no qual rótulo, resultado, unidade e referência aparecem em linhas distintas. Exemplo aceito:
+
+```text
+GASOMETRIA ARTERIAL
+pH
+7.37
+7,35 A 7,45
+PO2
+160.70
+mmHg
+80 A 100
+mmHg
+pCO2
+42.40
+mmHg
+38 A 50
+mmHg
+```
+
+O resultado reconhecido é pH 7.37, PaO₂ 160.70 mmHg e PaCO₂ 42.40 mmHg. Intervalos de referência isolados não são importados como resultados. A origem arterial/venosa central e todos os números ainda devem ser revisados e confirmados pelo usuário antes de aplicar, assim como em versões anteriores. As verificações de unidade que impedem importar glicose em mmol/L como mg/dL ou lactato em mg/dL como mmol/L continuam funcionando, mesmo quando a unidade está na linha seguinte.
+
+**Testes efetuados:** verificação de sintaxe de `script.js` e `importer.js`; 10 casos automatizados do parser, incluindo o texto exato que falhou, o formato antigo e cenários de segurança; arquivo ZIP testado quanto à integridade. Não houve publicação automática. A abertura gráfica em navegador não pôde ser testada nesta execução por restrição de acesso local do ambiente; o funcionamento interativo deve ser conferido no navegador após baixar a versão.

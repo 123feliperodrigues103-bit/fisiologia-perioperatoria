@@ -1,5 +1,5 @@
 "use strict";
-// v0.5.7.1 — OCR central com pré-processamento; valores ambíguos não são inferidos.
+// v0.6.7 — Importação de laudos em linhas ou colunas; não confundir referências com resultados.
 (() => {
  const dialog=document.getElementById('importDialog');
  const $=id=>document.getElementById(id);
@@ -64,43 +64,86 @@
   if(hasArterial)return 'arterial';
   return '';
  }
+ // Copiar tabelas de alguns prontuários empilha célula por célula:
+ // "pH\n7.37\n7,35 A 7,45\nPO2\n160.70\nmmHg\n80 A 100\nmmHg".
+ // O resultado é sempre o primeiro número ligado a um rótulo conhecido,
+ // nunca um intervalo de referência isolado.
+ const labNumber='[-+−]?\\d{1,5}(?:[.,]\\d{1,4})?';
+ const inlineLabValue=new RegExp(`^(.{1,48}?)(?:\\s*:\\s*|\\s+)(${labNumber})(?=\\s|%|$)`);
+ const standaloneLabValue=new RegExp(`^\\s*[:=]?\\s*(${labNumber})(?=\\s|%|$)`);
+ const referenceOnly=new RegExp(`^\\s*${labNumber}\\s*(?:a|ate|até|to|[-–—])\\s*${labNumber}(?:\\s*(?:mmhg|mmol\\s*\\/\\s*l|mg\\s*\\/\\s*dl|g\\s*\\/\\s*dl|m?eq\\s*\\/\\s*l|%))?\\s*$`,'i');
+ const unitOnly=/^(?:mmhg|mmol\s*\/\s*l|mg\s*\/\s*dl|g\s*\/\s*dl|m?eq\s*\/\s*l|%|\(?mmol\s*\/\s*l\)?)$/i;
+ function nearbyLabUnits(lines,index,readLine){
+  // A unidade pode estar na próxima linha (tabela copiada em colunas).
+  // Pare antes de uma nova variável ou de um intervalo de referência.
+  const parts=[readLine];
+  for(let j=index+1;j<Math.min(lines.length,index+4);j++){
+   const next=lines[j].trim();
+   if(!next)continue;
+   if(referenceOnly.test(next)||labelCode(next.replace(/[:：]\s*$/,''))||inlineLabValue.test(next))break;
+   if(!unitOnly.test(next))break;
+   parts.push(next);
+  }
+  return parts.join(' ');
+ }
  function parseLab(text){
   const clipped=String(text||'').slice(0,40000);
   const values={};const extras=[];const ambiguous=[];const invalid=[];const uncertain={};
   const lines=clipped.split(/\r?\n/);
-  let inTemperatureSection=false;
-  for(const raw of lines){
-   const line=raw.trim();
+  let inTemperatureSection=false,pending=null;
+  for(let i=0;i<lines.length;i++){
+   const line=lines[i].trim();
    if(!line)continue;
-   // Evita ler duplicatas (e eventuais erros de OCR) do bloco de correção por temperatura.
-   if(/valores?\s+corrigidos?\s+pela\s+temperatura/i.test(line)){inTemperatureSection=true;continue;}
+   if(/valores?\s+corrigidos?\s+pela\s+temperatura/i.test(line)){inTemperatureSection=true;pending=null;continue;}
    if(inTemperatureSection){
     if(/^(notas?|observac|impresso|resultados?)/i.test(line))inTemperatureSection=false;
     else continue;
    }
-   // O primeiro número APÓS o rótulo é o resultado; os seguintes são referências.
-   const m=line.match(/^(.{1,48}?)(?:\s*:\s*|\s+)([-+−]?\d{1,5}(?:[.,]\d{1,4})?)(?=\s|%|$)/);
-   if(!m)continue;
-   const label=m[1].trim(),key=labelCode(label);if(!key)continue;
-   const rawValue=m[2].replace('−','-');
-   const value=Number(rawValue.replace(',','.'));
+   let key=null,rawValue=null,resultLine=line;
+   const inline=line.match(inlineLabValue);
+   if(inline){
+    const inlineKey=labelCode(inline[1].trim());
+    if(inlineKey){
+     pending=null;
+     // "pH: 7,35 A 7,45" é somente referência, não resultado.
+     const afterLabel=line.slice(inline[1].length).replace(/^\s*:\s*/,'').trim();
+     if(referenceOnly.test(afterLabel))continue;
+     key=inlineKey;rawValue=inline[2];
+    }
+   }
+   if(!key){
+    const standalone=labelCode(line.replace(/[:：]\s*$/,'').trim());
+    if(standalone){pending={key:standalone,index:i};continue;}
+    if(!pending)continue;
+    // Nunca associar números distantes ou de uma nova seção ao campo anterior.
+    if(i-pending.index>4){pending=null;continue;}
+    if(referenceOnly.test(line)){pending=null;continue;}
+    const result=line.match(standaloneLabValue);
+    if(!result){
+     if(unitOnly.test(line))continue;
+     pending=null;continue;
+    }
+    key=pending.key;rawValue=result[1];pending=null;
+   }
+   const candidate=rawValue.replace('−','-');
+   const value=Number(candidate.replace(',','.'));
    if(!Number.isFinite(value))continue;
-   if(key in extraLabels){extras.push(`${extraLabels[key]} (${m[2]})`);continue;}
+   if(key in extraLabels){extras.push(`${extraLabels[key]} (${rawValue})`);continue;}
    let normalizedValue=value;
    if(key==='fio2'&&value>0&&value<=1)normalizedValue=value*100;
    const [,unit,min,max]=known[key];
    if(normalizedValue<min||normalizedValue>max){
-    // Não adivinhar 974→97,4, 36→3,6 ou 69→6,9. Deixar campo em branco para edição manual.
-    const warning=`${known[key][0]}: OCR/texto mostra “${m[2]}”, fora da faixa técnica ${min}–${max} ${unit}. Confira casas decimais na fotografia.`;
+    const warning=`${known[key][0]}: OCR/texto mostra “${rawValue}”, fora da faixa técnica ${min}–${max} ${unit}. Confira casas decimais na fotografia.`;
     invalid.push(warning);
-    if(!Object.hasOwn(values,key)&&!Object.hasOwn(uncertain,key))uncertain[key]=m[2];
+    if(!Object.hasOwn(values,key)&&!Object.hasOwn(uncertain,key))uncertain[key]=rawValue;
     continue;
    }
-   if(key==='glucose'&&/\bmmol\s*\/\s*l\b/i.test(line)){
+   const unitContext=nearbyLabUnits(lines,i,resultLine);
+   if(key==='glucose'&&/\bmmol\s*\/\s*l\b/i.test(unitContext)){
     invalid.push('Glicose apresentada em mmol/L: não importada automaticamente. Converta e confira no laudo antes de inserir em mg/dL.');
     continue;
    }
-   if(key==='lactate'&&/mg\s*\/\s*d[lL]/i.test(line)){
+   if(key==='lactate'&&/mg\s*\/\s*d[lL]/i.test(unitContext)){
     invalid.push('Lactato em mg/dL não foi importado: confira a unidade antes de preencher.');
     continue;
    }
@@ -111,7 +154,7 @@
    values[key]=normalizedValue;
    delete uncertain[key];
   }
-  return {sample:sourceType(clipped),values,extras,invalid,ambiguous,uncertain};
+  return {sample:sourceType(clipped.replace(/\s+/g,' ')),values,extras,invalid,ambiguous,uncertain};
  }
  function mappedKey(key,sample){return (toField[sample]&&toField[sample][key]) || (['fio2','na','k','cl','lactate','caion','mg','albumin','phosphate','glucose'].includes(key)?key:null);}
  function showReview(parsed){
